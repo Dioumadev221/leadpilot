@@ -22,10 +22,10 @@ LangGraph · LangChain · FastAPI · Python · PostgreSQL · HubSpot API · Zoho
 
 | # | File | Caption |
 |---|---|---|
-| 1 (cover) | `docs/media/04-leads.png` | Every inbound lead with its score, tier and status |
-| 2 | `docs/media/01-inbox-lead-detail.png` | A qualified lead: pipeline run, agent findings and the score breakdown |
-| 3 | `docs/media/03-reports.png` | Weekly pipeline report: numbers from the database, narrative from the analyst agent |
-| 4 | `docs/media/02-landing.png` | Product site |
+| 1 (cover) | `docs/media/02-landing.png` | LeadPilot: qualify every lead in seconds, approve what hits your CRM |
+| 2 | `docs/media/04-leads.png` | Every inbound lead with its score, tier and status |
+| 3 | `docs/media/01-inbox-lead-detail.png` | A qualified lead: pipeline run, agent findings and the score breakdown |
+| 4 | `docs/media/03-reports.png` | Weekly pipeline report: numbers from the database, narrative from the analyst agent |
 | 5 | `docs/media/05-integrations.png` | HubSpot, Zoho, webhooks, Slack and model provider |
 
 ## Links
