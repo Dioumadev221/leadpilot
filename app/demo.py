@@ -94,6 +94,14 @@ def seed_demo(session_factory, graph, settings, crm) -> int:
     return len(SAMPLE_LEADS)
 
 
+def demo_is_stuck(session_factory) -> bool:
+    """True when a seed was cut off mid-way (e.g. a serverless cold start that timed out)."""
+    cutoff = datetime.now(timezone.utc) - timedelta(minutes=30)
+    with session_factory() as s:
+        return bool(s.scalar(select(func.count(Lead.id)).where(
+            Lead.status.in_([LeadStatus.RECEIVED, LeadStatus.PROCESSING]), Lead.created_at < cutoff)))
+
+
 def reset_demo(session_factory, graph, settings, crm) -> int:
     with session_factory() as s:
         for model in (LeadEvent, Lead, Report, MockCrmRecord):

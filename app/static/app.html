@@ -11,54 +11,52 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/static/logo.svg" type="image/svg+xml">
 <style>
-  @font-face { font-family: "Space Grotesk"; src: url(/static/fonts/space-grotesk.woff2) format("woff2"); font-weight: 300 700; font-display: swap; }
-  @font-face { font-family: "IBM Plex Sans"; src: url(/static/fonts/plex-sans.woff2) format("woff2"); font-weight: 100 700; font-display: swap; }
+  @font-face { font-family: "Plus Jakarta Sans"; src: url(/static/fonts/jakarta.woff2) format("woff2"); font-weight: 200 800; font-display: swap; }
   @font-face { font-family: "IBM Plex Mono"; src: url(/static/fonts/plex-mono-400.woff2) format("woff2"); font-weight: 400; font-display: swap; }
-  @font-face { font-family: "IBM Plex Mono"; src: url(/static/fonts/plex-mono-500.woff2) format("woff2"); font-weight: 500; font-display: swap; }
-  @font-face { font-family: "IBM Plex Mono"; src: url(/static/fonts/plex-mono-600.woff2) format("woff2"); font-weight: 600 700; font-display: swap; }
+  @font-face { font-family: "IBM Plex Mono"; src: url(/static/fonts/plex-mono-500.woff2) format("woff2"); font-weight: 500 700; font-display: swap; }
   :root {
-    --bg: #fffdf9; --bg-2: #f7f4ee; --bg-3: #ece8df; --text: #17150f; --muted: #5f594d; --faint: #8f887a; --border: #e3ddd1;
-    --brand: #e24a12; --brand-2: #f2541b; --brand-soft: #fdebe2; --brand-ink: #ffffff;
-    --hot: #d92d20; --hot-soft: #fde8e6; --warm: #b45309; --warm-soft: #fdf0dc; --cold: #3a6b8a; --cold-soft: #e5eef4;
-    --ok: #1f7a4d; --ok-soft: #e2f2e9; --spam: #7a756b; --spam-soft: #ebe8e1; --amber: #9a6a00; --amber-soft: #fbf1d6;
-    --side: #17150f; --side-2: #221f18; --side-3: #2e2a21; --side-text: #f2ece0; --side-muted: #a49d8f; --side-line: #343026;
-    --display: "Space Grotesk", "IBM Plex Sans", system-ui, sans-serif; --mono-f: "IBM Plex Mono", ui-monospace, monospace;
-    --shadow: 0 1px 0 rgba(23,21,15,.04);
-    --shadow-lg: 0 18px 40px rgba(23,21,15,.18);
+    --bg: #ffffff; --bg-2: #f5f8f6; --bg-3: #e9efec; --text: #0c1a14; --muted: #52615a; --faint: #8a978f; --border: #e3e9e5;
+    --brand: #059669; --brand-2: #10b981; --brand-soft: #e7f8f0; --brand-ink: #ffffff;
+    --hot: #dc2626; --hot-soft: #fdecec; --warm: #b45309; --warm-soft: #fdf3e2; --cold: #2563eb; --cold-soft: #eaf1fe;
+    --ok: #047857; --ok-soft: #e7f8f0; --spam: #6b7280; --spam-soft: #f0f2f4; --amber: #a16207; --amber-soft: #fef6dc;
+    --side: #f5f8f6; --side-2: #ffffff; --side-3: #e7f8f0; --side-text: #0c1a14; --side-muted: #52615a; --side-line: #e3e9e5;
+    --display: "Plus Jakarta Sans", system-ui, sans-serif; --label-f: "Plus Jakarta Sans", system-ui, sans-serif; --mono-f: "IBM Plex Mono", ui-monospace, monospace;
+    --shadow: 0 1px 2px rgba(12,26,20,.05);
+    --shadow-lg: 0 18px 40px rgba(12,26,20,.16);
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #1a1813; --bg-2: #13120e; --bg-3: #26231b; --text: #f0ebe0; --muted: #b0a999; --faint: #7d776a; --border: #302c23;
-      --brand: #ff6a33; --brand-2: #ff7a45; --brand-soft: #3a1a0c; --brand-ink: #ffffff;
-      --hot: #ff6b5e; --hot-soft: #3a1512; --warm: #f0a24a; --warm-soft: #33230e; --cold: #8fbad6; --cold-soft: #13222d;
-      --ok: #5fd39a; --ok-soft: #10281c; --spam: #a39d90; --spam-soft: #24221b; --amber: #f2c14e; --amber-soft: #2e2510;
-      --side: #0e0d0a; --side-2: #1a1813; --side-3: #26231b; --side-line: #26231b;
+      --bg: #0f1916; --bg-2: #0b1210; --bg-3: #16231f; --text: #e8f0ec; --muted: #9fb0a8; --faint: #6f8078; --border: #1f2d28;
+      --brand: #34d399; --brand-2: #34d399; --brand-soft: #0d2a20; --brand-ink: #04140e;
+      --hot: #f87171; --hot-soft: #2c1212; --warm: #fbbf24; --warm-soft: #2a200c; --cold: #93c5fd; --cold-soft: #0f1d33;
+      --ok: #34d399; --ok-soft: #0d2a20; --spam: #9ca3af; --spam-soft: #1a2420; --amber: #facc15; --amber-soft: #2a240a;
+      --side: #0b1210; --side-2: #0f1916; --side-3: #0d2a20; --side-text: #e8f0ec; --side-muted: #9fb0a8; --side-line: #1f2d28;
       --shadow: none; --shadow-lg: 0 18px 40px rgba(0,0,0,.55);
     }
   }
   * { box-sizing: border-box }
   html, body { height: 100% }
-  body { margin: 0; font: 14px/1.5 "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased }
+  body { margin: 0; font: 14px/1.5 "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased }
   a { color: var(--brand); text-decoration: none }
   code, .mono { font-family: var(--mono-f); font-size: 12.5px }
   button { font: inherit; cursor: pointer }
   .shell { display: grid; grid-template-columns: 236px 1fr; height: 100vh }
 
   /* sidebar */
-  aside { background: var(--side); color: var(--side-text); display: flex; flex-direction: column; padding: 18px 14px; gap: 14px }
+  aside { background: var(--side); color: var(--side-text); border-right: 1px solid var(--side-line); display: flex; flex-direction: column; padding: 18px 14px; gap: 14px }
   .brand { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 700; font-size: 17px; letter-spacing: -.02em; padding: 2px 6px; color: var(--side-text) }
   .brand img { width: 30px; height: 30px }
-  .ws { display: flex; gap: 10px; align-items: center; padding: 9px 10px; border: 1px solid var(--side-line); border-radius: 6px; background: var(--side-2) }
-  .ws .av { width: 30px; height: 30px; border-radius: 5px; background: var(--side-text); color: var(--side);  font-family: var(--mono-f); font-weight: 700; display: grid; place-items: center; font-size: 12px }
+  .ws { display: flex; gap: 10px; align-items: center; padding: 9px 10px; border: 1px solid var(--side-line); border-radius: 12px; background: var(--side-2) }
+  .ws .av { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg, #10b981, #047857); color: #fff;  font-family: var(--label-f); font-weight: 700; display: grid; place-items: center; font-size: 12px }
   .ws b { display: block; font-size: 13px; color: var(--side-text) } .ws span { font-size: 12px; color: var(--side-muted) }
-  .pill-sample { font-family: var(--mono-f); font-size: 10.5px; font-weight: 500; color: #f2c14e; border: 1px solid rgba(242,193,78,.4); padding: 0 5px; border-radius: 3px; text-transform: uppercase; letter-spacing: .04em }
+  .pill-sample { font-size: 11px; font-weight: 700; color: var(--amber); background: var(--amber-soft); padding: 0 7px; border-radius: 99px }
   nav.side { display: flex; flex-direction: column; gap: 2px }
-  nav.side button { display: flex; align-items: center; gap: 10px; border: 0; background: none; color: var(--side-muted); padding: 8px 10px; border-radius: 5px; text-align: left; font-weight: 500; position: relative }
+  nav.side button { display: flex; align-items: center; gap: 10px; border: 0; background: none; color: var(--side-muted); padding: 8px 10px; border-radius: 9px; text-align: left; font-weight: 600; position: relative }
   nav.side button:hover { background: var(--side-2); color: var(--side-text) }
-  nav.side button.on { background: var(--side-3); color: var(--side-text) } nav.side button.on::before { content: ""; position: absolute; left: -14px; top: 8px; bottom: 8px; width: 3px; border-radius: 0 3px 3px 0; background: var(--brand-2) } nav.side button.on svg { color: var(--brand-2) }
+  nav.side button.on { background: var(--side-3); color: var(--brand); font-weight: 700 }
   nav.side svg { width: 18px; height: 18px; flex: none }
-  nav.side .count { margin-left: auto; font-family: var(--mono-f); font-size: 11px; font-weight: 600; background: var(--brand-2); color: #fff; border-radius: 4px; padding: 0 7px; min-width: 20px; text-align: center }
-  .side-foot { margin-top: auto; border-top: 1px solid var(--side-line); padding: 12px 8px 0; font-family: var(--mono-f); font-size: 11.5px; color: var(--side-muted); display: grid; gap: 4px }
+  nav.side .count { margin-left: auto; font-family: var(--label-f); font-size: 11px; font-weight: 600; background: var(--brand); color: #fff; border-radius: 99px; padding: 0 7px; min-width: 20px; text-align: center }
+  .side-foot { margin-top: auto; border-top: 1px solid var(--side-line); padding: 12px 8px 0; font-family: var(--label-f); font-size: 11.5px; color: var(--side-muted); display: grid; gap: 4px }
   .dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block; margin-right: 6px; box-shadow: 0 0 0 3px color-mix(in srgb, #10b981 20%, transparent) }
 
   /* main */
@@ -66,9 +64,9 @@
   .top { display: flex; align-items: center; gap: 12px; padding: 16px 26px; border-bottom: 1px solid var(--border); background: var(--bg) }
   .top h1 { font-family: var(--display); font-size: 21px; letter-spacing: -.02em; margin: 0 } .top p { margin: 0; color: var(--muted); font-size: 13px }
   .top .sp { flex: 1 }
-  .btn { border: 1px solid var(--border); background: var(--bg); color: var(--text); border-radius: 6px; padding: 8px 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 7px; box-shadow: var(--shadow) }
+  .btn { border: 1px solid var(--border); background: var(--bg); color: var(--text); border-radius: 10px; padding: 8px 14px; font-weight: 700; display: inline-flex; align-items: center; gap: 7px; box-shadow: var(--shadow) }
   .btn:hover { border-color: color-mix(in srgb, var(--brand) 45%, var(--border)) }
-  .btn.primary { background: var(--text); border-color: var(--text); color: var(--bg) } .btn.primary svg { color: var(--brand-2) }
+  .btn.primary { background: var(--brand); border-color: var(--brand); color: var(--brand-ink) }
   .btn.primary:hover { filter: brightness(1.07) }
   .btn.ok { background: var(--ok); border-color: var(--ok); color: #fff }
   .btn.ghost { box-shadow: none }
@@ -83,49 +81,49 @@
   .tabs { display: flex; gap: 4px; padding: 6px 14px 0; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 2; flex-wrap: wrap }
   .tabs button { border: 0; border-bottom: 2px solid transparent; background: none; color: var(--muted); padding: 6px 4px; margin-right: 10px; border-radius: 0; font-size: 13px; font-weight: 600 }
   .tabs button.on { color: var(--text); border-bottom-color: var(--brand-2) }
-  .tabs button i { font-style: normal; color: var(--faint); margin-left: 4px; font-weight: 500; font-family: var(--mono-f); font-size: 11.5px }
+  .tabs button i { font-style: normal; color: var(--faint); margin-left: 4px; font-weight: 500; font-family: var(--label-f); font-size: 11.5px }
   .row { display: grid; grid-template-columns: 42px 1fr auto; gap: 11px; padding: 12px 14px; border-bottom: 1px solid var(--border); cursor: pointer; align-items: center }
-  .row:hover { background: var(--bg-2) } .row.sel { background: var(--bg-2); box-shadow: inset 3px 0 0 var(--brand-2) }
-  .sc { width: 42px; height: 42px; border-radius: 5px; display: grid; place-items: center; font-family: var(--mono-f); font-weight: 600; font-size: 15px; font-variant-numeric: tabular-nums }
+  .row:hover { background: var(--bg-2) } .row.sel { background: var(--brand-soft); box-shadow: inset 3px 0 0 var(--brand) }
+  .sc { width: 42px; height: 42px; border-radius: 11px; display: grid; place-items: center; font-weight: 800; font-size: 15px; font-variant-numeric: tabular-nums }
   .t-hot { color: var(--hot); background: var(--hot-soft) } .t-warm { color: var(--warm); background: var(--warm-soft) }
   .t-cold { color: var(--cold); background: var(--cold-soft) } .t-spam { color: var(--spam); background: var(--spam-soft) }
   .row .who { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
   .row .sub { font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
   .row .meta { text-align: right; font-size: 11.5px; color: var(--faint); white-space: nowrap }
-  .chip { display: inline-flex; align-items: center; gap: 5px; font-family: var(--mono-f); font-size: 11px; font-weight: 500; padding: 1px 7px; border-radius: 4px; border: 1px solid var(--border); color: var(--muted); background: var(--bg) }
+  .chip { display: inline-flex; align-items: center; gap: 5px; font-family: var(--label-f); font-size: 11.5px; font-weight: 700; padding: 1px 8px; border-radius: 99px; border: 1px solid var(--border); color: var(--muted); background: var(--bg) }
   .chip.hot { color: var(--hot); background: var(--hot-soft); border-color: transparent } .chip.warm { color: var(--warm); background: var(--warm-soft); border-color: transparent }
   .chip.cold { color: var(--cold); background: var(--cold-soft); border-color: transparent } .chip.spam { color: var(--spam); background: var(--spam-soft); border-color: transparent }
   .chip.ok { color: var(--ok); background: var(--ok-soft); border-color: transparent } .chip.brand { color: var(--brand); background: var(--brand-soft); border-color: transparent }
   .detail { overflow: auto; padding: 22px 26px 40px; background: var(--bg-2) }
   .empty { display: grid; place-items: center; height: 100%; color: var(--muted); text-align: center; padding: 40px }
-  .card { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 18px 20px; margin-bottom: 14px; box-shadow: var(--shadow) }
-  .card h3 { margin: 0 0 12px; font-family: var(--mono-f); font-weight: 500; font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 8px }
-  .card h3 .r { margin-left: auto; text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--faint); font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 12px; text-align: right }
+  .card { background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; margin-bottom: 14px; box-shadow: var(--shadow) }
+  .card h3 { margin: 0 0 12px; font-family: var(--label-f); font-weight: 700; font-size: 11.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 8px }
+  .card h3 .r { margin-left: auto; text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--faint);  font-size: 12px; text-align: right }
   .lead-head { display: flex; gap: 14px; align-items: center; flex-wrap: wrap }
-  .lead-head .av { width: 46px; height: 46px; border-radius: 6px; font-family: var(--mono-f); background: var(--bg-3); display: grid; place-items: center; font-weight: 700; color: var(--muted) }
+  .lead-head .av { width: 46px; height: 46px; border-radius: 12px; font-family: var(--label-f); background: var(--bg-3); display: grid; place-items: center; font-weight: 700; color: var(--muted) }
   .lead-head h2 { margin: 0; font-family: var(--display); font-size: 21px; letter-spacing: -.02em } .lead-head .m { color: var(--muted); font-size: 13px }
   .lead-head .acts { margin-left: auto; display: flex; gap: 8px }
-  .quote { margin: 14px 0 0; padding: 12px 14px; border-left: 3px solid var(--brand-2); background: var(--bg-2); border-radius: 0 6px 6px 0; white-space: pre-wrap }
+  .quote { margin: 14px 0 0; padding: 12px 14px; border-left: 3px solid var(--brand); background: var(--bg-2); border-radius: 0 10px 10px 0; white-space: pre-wrap }
   .steps { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0; position: relative }
   .step { position: relative; padding-top: 30px; text-align: center; font-size: 12px; color: var(--muted) }
   .step::before { content: ""; position: absolute; top: 11px; left: 0; right: 0; height: 2px; background: var(--border) }
   .step:first-child::before { left: 50% } .step:last-child::before { right: 50% }
-  .step .b { position: absolute; top: 0; left: calc(50% - 12px); width: 24px; height: 24px; border-radius: 5px; display: grid; place-items: center; background: var(--bg-3); color: var(--faint); border: 2px solid var(--bg); z-index: 1 }
-  .step.done .b { background: var(--ok); color: #fff } .step.wait .b { background: var(--brand-2); color: #fff } .step.stop .b { background: var(--spam); color: #fff }
+  .step .b { position: absolute; top: 0; left: calc(50% - 12px); width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--bg-3); color: var(--faint); border: 2px solid var(--bg); z-index: 1 }
+  .step.done .b { background: var(--ok); color: #fff } .step.wait .b { background: var(--amber); color: #fff } .step.stop .b { background: var(--spam); color: #fff }
   .step.done::before { background: color-mix(in srgb, var(--ok) 55%, var(--border)) }
   .step b { display: block; color: var(--text); font-weight: 600; font-size: 12.5px }
   .step .b svg { width: 13px; height: 13px }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px }
   .kv { display: grid; grid-template-columns: 120px 1fr; gap: 7px 12px; font-size: 13.5px } .kv > div:nth-child(odd) { color: var(--muted) }
-  .big { display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px } .big b { font-family: var(--mono-f); font-weight: 600; font-size: 38px; letter-spacing: -.04em; font-variant-numeric: tabular-nums }
+  .big { display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px } .big b { font-weight: 800; font-size: 38px; letter-spacing: -.04em; font-variant-numeric: tabular-nums }
   .bd { display: grid; grid-template-columns: 1fr 90px 44px; gap: 10px; align-items: center; padding: 5px 0; font-size: 13px; border-bottom: 1px dashed var(--border) }
   .bd:last-child { border: 0 }
-  .bar { height: 6px; border-radius: 3px; background: var(--bg-3); overflow: hidden; position: relative }
+  .bar { height: 6px; border-radius: 99px; background: var(--bg-3); overflow: hidden; position: relative }
   .bar i { position: absolute; top: 0; bottom: 0; border-radius: 99px }
   .pos { color: var(--ok); font-weight: 600; text-align: right; font-variant-numeric: tabular-nums } .neg { color: var(--hot); font-weight: 600; text-align: right; font-variant-numeric: tabular-nums }
   .reason { margin: 12px 0 0; color: var(--muted); font-size: 13px }
   label.f { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin: 12px 0 5px }
-  input, textarea, select { width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 9px 11px; font: inherit }
+  input, textarea, select { width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 9px 11px; font: inherit }
   input:focus, textarea:focus, select:focus { outline: 2px solid color-mix(in srgb, var(--brand) 35%, transparent); border-color: var(--brand) }
   textarea { min-height: 96px; resize: vertical; line-height: 1.5 }
   .draft-acts { display: flex; gap: 8px; margin-top: 14px; align-items: center; flex-wrap: wrap }
@@ -138,12 +136,12 @@
   /* reports */
   .page { padding: 24px 26px 48px; max-width: 1180px }
   .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 14px }
-  .kpi { background: var(--bg); border: 1px solid var(--border); border-top: 2px solid var(--text); border-radius: 0 0 6px 6px; padding: 15px 16px; box-shadow: var(--shadow) }
-  .kpi span { color: var(--muted); font-family: var(--mono-f); font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em } .kpi b { display: block; font-family: var(--display); font-size: 30px; letter-spacing: -.03em; font-variant-numeric: tabular-nums; margin-top: 2px }
+  .kpi { background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 15px 16px; box-shadow: var(--shadow) }
+  .kpi span { color: var(--muted); font-family: var(--label-f); font-size: 12.5px; font-weight: 600 } .kpi b { display: block; font-family: var(--display); font-size: 30px; letter-spacing: -.03em; font-variant-numeric: tabular-nums; margin-top: 2px }
   .kpi small { color: var(--faint); font-size: 12px }
   .hbar { display: grid; grid-template-columns: 150px 1fr 34px; gap: 10px; align-items: center; padding: 6px 0; font-size: 13px }
-  .hbar .bar { height: 8px } .hbar .bar i { left: 0; background: var(--text) } .hbar:first-child .bar i { background: var(--brand-2) }
-  .stack { display: flex; height: 12px; border-radius: 3px; overflow: hidden; background: var(--bg-3); margin: 8px 0 10px }
+  .hbar .bar { height: 8px } .hbar .bar i { left: 0; background: linear-gradient(90deg, var(--brand-2), var(--brand)) }
+  .stack { display: flex; height: 12px; border-radius: 99px; overflow: hidden; background: var(--bg-3); margin: 8px 0 10px }
   .stack i { display: block; height: 100% }
   .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted) } .legend i { display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: 5px }
   ol.acts { margin: 6px 0 0; padding-left: 20px } ol.acts li { margin: 6px 0 }
@@ -151,10 +149,10 @@
   /* integrations */
   .ints { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px }
   .int { display: flex; flex-direction: column; gap: 8px }
-  .int .hd { display: flex; align-items: center; gap: 11px } .int .ic { width: 38px; height: 38px; border-radius: 6px; font-family: var(--mono-f); display: grid; place-items: center; font-weight: 800; color: #fff; font-size: 14px }
+  .int .hd { display: flex; align-items: center; gap: 11px } .int .ic { width: 38px; height: 38px; border-radius: 10px; font-family: var(--label-f); display: grid; place-items: center; font-weight: 800; color: #fff; font-size: 14px }
   .int .hd b { font-size: 15px } .int .hd .chip { margin-left: auto }
   .int p { margin: 0; color: var(--muted); font-size: 13.5px }
-  pre { margin: 6px 0 0; background: #17150f; color: #f2ece0; border-radius: 6px; padding: 12px 14px; overflow: auto; font-size: 12px; line-height: 1.55 }
+  pre { margin: 6px 0 0; background: #0c1a14; color: #d9f2e6; border-radius: 10px; padding: 12px 14px; overflow: auto; font-size: 12px; line-height: 1.55 }
   .endpoint { display: grid; grid-template-columns: 64px 1fr; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13.5px; align-items: baseline }
   .endpoint .m { font-family: var(--mono-f); font-size: 11.5px; font-weight: 700; color: var(--brand) }
   .endpoint span { color: var(--muted) }
@@ -162,14 +160,14 @@
   /* modal */
   .modal { position: fixed; inset: 0; background: rgba(8,12,20,.45); display: none; align-items: flex-start; justify-content: center; padding: 6vh 16px; z-index: 50; overflow: auto }
   .modal.on { display: flex }
-  .sheet { background: var(--bg); border-radius: 10px; width: min(640px, 100%); box-shadow: var(--shadow-lg); border: 1px solid var(--border) }
+  .sheet { background: var(--bg); border-radius: 16px; width: min(640px, 100%); box-shadow: var(--shadow-lg); border: 1px solid var(--border) }
   .sheet .hd { padding: 18px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center }
   .sheet .hd h2 { margin: 0; font-family: var(--display); font-size: 18px } .sheet .hd button { margin-left: auto; border: 0; background: none; color: var(--muted); font-size: 20px }
-  .sheet .bd2 { padding: 6px 22px 20px } .sheet .ft { padding: 14px 22px; border-top: 1px solid var(--border); display: flex; gap: 8px; align-items: center; background: var(--bg-2); border-radius: 0 0 10px 10px }
-  .presets { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px } .presets button { border: 1px solid var(--border); background: var(--bg-2); border-radius: 5px; padding: 4px 11px; font-size: 12.5px; color: var(--muted) }
+  .sheet .bd2 { padding: 6px 22px 20px } .sheet .ft { padding: 14px 22px; border-top: 1px solid var(--border); display: flex; gap: 8px; align-items: center; background: var(--bg-2); border-radius: 0 0 16px 16px }
+  .presets { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px } .presets button { border: 1px solid var(--border); background: var(--bg-2); border-radius: 99px; padding: 4px 11px; font-size: 12.5px; color: var(--muted) }
   .presets button:hover { color: var(--text); border-color: var(--brand) }
   .f2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px }
-  .hint { font-size: 12.5px; color: var(--muted); background: var(--bg-2); border: 1px dashed var(--border); border-radius: 6px; padding: 9px 12px; margin-top: 14px }
+  .hint { font-size: 12.5px; color: var(--muted); background: var(--brand-soft); border: 0; border-radius: 10px; padding: 9px 12px; margin-top: 14px }
   .toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-weight: 500; opacity: 0; transition: .2s; z-index: 60; box-shadow: var(--shadow-lg) }
   .toast.on { opacity: 1; transform: translateX(-50%) }
   .spin { width: 15px; height: 15px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: sp .7s linear infinite; display: inline-block }
@@ -184,8 +182,8 @@
     .lead-head .acts { margin-left: 0 } .f2 { grid-template-columns: 1fr } .kv { grid-template-columns: 105px 1fr }
   }
   .mobnav { display: none; gap: 4px; padding: 8px 12px; border-bottom: 1px solid var(--border); overflow-x: auto }
-  .mobnav button { border: 1px solid var(--border); background: var(--bg); border-radius: 5px; padding: 5px 12px; font-size: 13px; white-space: nowrap; color: var(--muted) }
-  .mobnav button.on { color: var(--bg); background: var(--text); border-color: var(--text) }
+  .mobnav button { border: 1px solid var(--border); background: var(--bg); border-radius: 99px; padding: 5px 12px; font-size: 13px; white-space: nowrap; color: var(--muted) }
+  .mobnav button.on { color: var(--brand-ink); background: var(--brand); border-color: var(--brand) }
   @media (max-width: 860px) { .mobnav { display: flex } }
 </style>
 </head>

@@ -69,9 +69,14 @@ async def lifespan(app: FastAPI):
     log.info("LeadPilot up | llm=%s crm=%s", settings.llm_provider if st.llm else "heuristic", st.crm.name)
 
     if (settings.seed_demo or settings.demo_mode) and st.crm.name == "mock":
-        from app.demo import seed_demo
+        from app.demo import demo_is_stuck, reset_demo, seed_demo
 
-        if seed_demo(st.session_factory, st.graph, settings, st.crm):
+        # Sample data runs in rules mode without website fetches so a cold start stays fast.
+        st.seed_graph = build_graph(settings, None, None)
+        if settings.demo_mode and demo_is_stuck(st.session_factory):
+            reset_demo(st.session_factory, st.seed_graph, settings, st.crm)
+            generate_report(st.session_factory, st.llm)
+        elif seed_demo(st.session_factory, st.seed_graph, settings, st.crm):
             generate_report(st.session_factory, st.llm)
 
     stop = threading.Event()
@@ -200,7 +205,7 @@ def cron_daily(request: Request, authorization: str | None = Header(default=None
     if st.settings.demo_mode and st.crm.name == "mock":
         from app.demo import reset_demo
 
-        done["demo_reseeded"] = reset_demo(st.session_factory, st.graph, st.settings, st.crm)
+        done["demo_reseeded"] = reset_demo(st.session_factory, getattr(st, "seed_graph", st.graph), st.settings, st.crm)
         generate_report(st.session_factory, st.llm)
         done["report"] = True
     elif datetime.now(timezone.utc).strftime("%a").lower() == st.settings.report_cron_day:

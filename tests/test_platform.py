@@ -75,3 +75,18 @@ def test_ssrf_guard_blocks_internal_hosts(host):
                                            ("Budget 6000€, démarrage", "6000€")])
 def test_budget_amount_extraction(text, expected):
     assert _amount(text) == expected
+
+
+def test_stuck_demo_seed_is_detected(session_factory):
+    from datetime import datetime, timedelta, timezone
+
+    from app.demo import demo_is_stuck
+
+    with session_factory() as s:
+        s.add(Lead(email="fresh@acme.io", message="hi"))
+        s.commit()
+    assert not demo_is_stuck(session_factory)  # a lead that just arrived is not stuck
+    with session_factory() as s:
+        s.add(Lead(email="old@acme.io", message="hi", created_at=datetime.now(timezone.utc) - timedelta(hours=3)))
+        s.commit()
+    assert demo_is_stuck(session_factory)
