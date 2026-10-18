@@ -163,22 +163,23 @@ def _enqueue(request: Request, bg: BackgroundTasks, s: Session, data: LeadIn, ra
     return lead
 
 
-def _page(name: str) -> HTMLResponse:
+def _page(request: Request, name: str) -> HTMLResponse:
     html = (STATIC / name).read_text(encoding="utf-8")
     st = get_settings()
-    if st.public_url:  # link previews (LinkedIn, Upwork, WhatsApp) need absolute image URLs
-        html = html.replace('content="/static/', f'content="{st.public_url.rstrip("/")}/static/')
+    # Link previews (LinkedIn, Upwork, WhatsApp) need absolute image URLs.
+    base = (st.public_url or str(request.base_url).replace("http://", "https://", 1)).rstrip("/")
+    html = html.replace('content="/static/', f'content="{base}/static/')
     return HTMLResponse(html.replace("{{CONTACT_URL}}", st.contact_url))
 
 
 @app.get("/", include_in_schema=False)
-def landing():
-    return _page("landing.html")
+def landing(request: Request):
+    return _page(request, "landing.html")
 
 
 @app.get("/app", include_in_schema=False)
-def web_app():
-    return _page("app.html")
+def web_app(request: Request):
+    return _page(request, "app.html")
 
 
 @app.get("/favicon.ico", include_in_schema=False)
