@@ -8,6 +8,8 @@ import re
 
 from langchain_core.language_models.chat_models import BaseChatModel
 
+from app.config import get_settings
+from app.llm import structured
 from app.schemas import CrmDraft, Qualification
 
 QUALIFIER_SYSTEM = """You are a B2B lead qualification analyst for an AI & backend development consultancy.
@@ -19,12 +21,12 @@ Extract buying signals from the inbound lead. Rules:
 - Mark is_spam for SEO/link-building/marketing pitches, people selling services TO us, job seekers, tests and gibberish.
 - In reasoning, quote the lead's own words."""
 
-WRITER_SYSTEM = """You write for a senior AI & backend consultant. Be specific, concise, no hype, no emojis.
+WRITER_SYSTEM = """You write for {sender}, a senior AI & backend studio. Be specific, concise, no hype, no emojis.
 The CRM note is for the sales pipeline. The reply email goes to the lead and must:
 - reference their actual need in one sentence,
 - ask at most two sharp qualifying questions,
 - propose a 20-minute call,
-- stay under 120 words, signed "Diouma"."""
+- stay under 120 words, signed "{sender}"."""
 
 
 def _lead_block(lead: dict, enrichment: dict) -> str:
@@ -44,8 +46,8 @@ def _lead_block(lead: dict, enrichment: dict) -> str:
 # ---------------- qualifier ----------------
 
 def qualify_with_llm(llm: BaseChatModel, lead: dict, enrichment: dict, icp: str) -> Qualification:
-    structured = llm.with_structured_output(Qualification)
-    return structured.invoke([
+    chain = structured(llm, Qualification)
+    return chain.invoke([
         ("system", QUALIFIER_SYSTEM.format(icp=icp)),
         ("human", _lead_block(lead, enrichment)),
     ])
@@ -71,6 +73,12 @@ BUDGET_RE = re.compile(
     r"|budget\D{0,20}\d[\d,.\s]*k?(?:\s?(?:\$|€|£|usd|eur))?",  # budget is around 8000
     re.I,
 )
+
+
+def _amount(text: str) -> str:
+    """'Budget is around 8000,' -> '8000'; '$15k' stays '$15k'."""
+    m = re.search(r"(?:\$|€|£)?\s?\d[\d,.\s]*k?\s?(?:\$|€|£|usd|eur|dollars|euros)?", text, re.I)
+    return (m.group(0) if m else text).strip(" ,.")
 
 
 def _any(patterns: list[str], text: str) -> bool:
@@ -114,7 +122,7 @@ def qualify_heuristic(lead: dict, enrichment: dict) -> Qualification:
         intent="low" if is_spam else intent,
         icp_fit=icp_fit,
         budget_signal=budget_signal,
-        budget_amount=budget_match.group(0).strip(" ,.") if budget_match else None,
+        budget_amount=_amount(budget_match.group(0)) if budget_match else None,
         timeline=timeline,
         use_case=use_case,
         need_summary=first_sentence or "No message provided.",
@@ -131,9 +139,9 @@ def qualify_heuristic(lead: dict, enrichment: dict) -> Qualification:
 # ---------------- writer ----------------
 
 def draft_with_llm(llm: BaseChatModel, lead: dict, enrichment: dict, q: dict, score: int, tier: str) -> CrmDraft:
-    structured = llm.with_structured_output(CrmDraft)
-    return structured.invoke([
-        ("system", WRITER_SYSTEM),
+    chain = structured(llm, CrmDraft)
+    return chain.invoke([
+        ("system", WRITER_SYSTEM.format(sender=get_settings().sender_name)),
         ("human", f"{_lead_block(lead, enrichment)}\n\nQualification: {q}\nScore: {score}/100 ({tier})"),
     ])
 
@@ -156,8 +164,8 @@ def draft_template(lead: dict, enrichment: dict, q: dict, score: int, tier: str)
     body = (
         f"Hi {name},\n\n"
         f"Thanks for reaching out about {q['use_case']} for {company}. "
-        f"I build exactly this in production (Python/FastAPI, LangGraph, PostgreSQL).{ask}\n\n"
+        f"We design and run exactly this kind of system in production.{ask}\n\n"
         f"Happy to do a 20-minute call this week to map the architecture and give you a clear estimate.\n\n"
-        f"Best,\nDiouma"
+        f"Best,\n{get_settings().sender_name}"
     )
     return CrmDraft(note=note, reply_subject=f"Re: {q['use_case']} for {company}", reply_body=body)

@@ -1,13 +1,23 @@
+import hashlib
 import logging
 import threading
 from contextlib import asynccontextmanager
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import httpx
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
-from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, Query, Request
-from fastapi.responses import FileResponse
+from fastapi import (
+    BackgroundTasks,
+    Depends,
+    FastAPI,
+    Header,
+    HTTPException,
+    Query,
+    Request,
+)
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import ValidationError
 from sqlalchemy import func, select
@@ -22,7 +32,14 @@ from app.llm import get_chat_model
 from app.models import Lead, LeadStatus, Report
 from app.report import generate_report
 from app.schemas import ApproveIn, LeadDetailOut, LeadIn, LeadOut, RejectIn, ReportOut
-from app.services import InvalidState, approve_lead, log_event, process_lead, process_pending, reject_lead
+from app.services import (
+    InvalidState,
+    approve_lead,
+    log_event,
+    process_lead,
+    process_pending,
+    reject_lead,
+)
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 log = logging.getLogger("leadpilot")
@@ -51,7 +68,7 @@ async def lifespan(app: FastAPI):
     st.crm = getattr(st, "crm", None) or get_crm(settings, st.session_factory)
     log.info("LeadPilot up | llm=%s crm=%s", settings.llm_provider if st.llm else "heuristic", st.crm.name)
 
-    if settings.seed_demo and st.crm.name == "mock":
+    if (settings.seed_demo or settings.demo_mode) and st.crm.name == "mock":
         from app.demo import seed_demo
 
         if seed_demo(st.session_factory, st.graph, settings, st.crm):
@@ -104,12 +121,25 @@ def _get_lead(s: Session, lead_id: int) -> Lead:
     return lead
 
 
+def _client_ip_hash(request: Request) -> str:
+    fwd = request.headers.get("x-forwarded-for", "")
+    ip = fwd.split(",")[0].strip() or (request.client.host if request.client else "")
+    return hashlib.sha256(f"leadpilot:{ip}".encode()).hexdigest()
+
+
 def _enqueue(request: Request, bg: BackgroundTasks, s: Session, data: LeadIn, raw: dict, idem: str | None) -> Lead:
+    st = request.app.state
     if idem:
         existing = s.scalar(select(Lead).where(Lead.idempotency_key == idem))
         if existing:
             return existing
-    lead = Lead(**data.model_dump(), raw=raw, idempotency_key=idem)
+    ip_hash = _client_ip_hash(request)
+    if st.settings.demo_mode:
+        since = datetime.now(timezone.utc) - timedelta(hours=1)
+        recent = s.scalar(select(func.count(Lead.id)).where(Lead.client_ip_hash == ip_hash, Lead.created_at >= since))
+        if recent >= st.settings.demo_submissions_per_hour:
+            raise HTTPException(429, "Demo limit reached: a few test leads per hour. Try again later.")
+    lead = Lead(**data.model_dump(), raw=raw, idempotency_key=idem, client_ip_hash=ip_hash)
     s.add(lead)
     try:
         s.commit()
@@ -118,15 +148,65 @@ def _enqueue(request: Request, bg: BackgroundTasks, s: Session, data: LeadIn, ra
         return s.scalar(select(Lead).where(Lead.idempotency_key == idem))
     log_event(s, lead.id, "received", {"source": lead.source})
     s.commit()
-    st = request.app.state
-    # Low latency path; the polling worker is the safety net if this process dies.
+    if st.settings.inline_processing:
+        # Serverless: no process outlives the request, so run the (bounded) pipeline now.
+        process_lead(lead.id, st.session_factory, st.graph, st.settings)
+        s.expire_all()
+        return s.get(Lead, lead.id)
+    # Long-running host: answer immediately; the polling worker is the safety net if this process dies.
     bg.add_task(process_lead, lead.id, st.session_factory, st.graph, st.settings)
     return lead
 
 
+def _page(name: str) -> HTMLResponse:
+    html = (STATIC / name).read_text(encoding="utf-8")
+    st = get_settings()
+    if st.public_url:  # link previews (LinkedIn, Upwork, WhatsApp) need absolute image URLs
+        html = html.replace('content="/static/', f'content="{st.public_url.rstrip("/")}/static/')
+    return HTMLResponse(html.replace("{{CONTACT_URL}}", st.contact_url))
+
+
 @app.get("/", include_in_schema=False)
-def ui():
-    return FileResponse(STATIC / "index.html")
+def landing():
+    return _page("landing.html")
+
+
+@app.get("/app", include_in_schema=False)
+def web_app():
+    return _page("app.html")
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    return FileResponse(STATIC / "logo.svg", media_type="image/svg+xml")
+
+
+@app.get("/api/meta")
+def meta(request: Request):
+    st = request.app.state
+    return {"workspace": st.settings.workspace_name, "demo": st.settings.demo_mode,
+            "contact_url": st.settings.contact_url, "crm": st.crm.name,
+            "llm": (st.settings.llm_model if st.llm else "rules"), "hot_threshold": st.settings.hot_threshold,
+            "warm_threshold": st.settings.warm_threshold}
+
+
+@app.get("/api/cron/daily", include_in_schema=False)
+def cron_daily(request: Request, authorization: str | None = Header(default=None)):
+    """Vercel Cron (Hobby: once a day). Drains the queue, resets the public demo, writes the weekly report."""
+    st = request.app.state
+    if not st.settings.cron_secret or authorization != f"Bearer {st.settings.cron_secret}":
+        raise HTTPException(401, "invalid cron secret")
+    done = {"processed": process_pending(st.session_factory, st.graph, st.settings)}
+    if st.settings.demo_mode and st.crm.name == "mock":
+        from app.demo import reset_demo
+
+        done["demo_reseeded"] = reset_demo(st.session_factory, st.graph, st.settings, st.crm)
+        generate_report(st.session_factory, st.llm)
+        done["report"] = True
+    elif datetime.now(timezone.utc).strftime("%a").lower() == st.settings.report_cron_day:
+        generate_report(st.session_factory, st.llm, slack_webhook_url=st.settings.slack_webhook_url)
+        done["report"] = True
+    return done
 
 
 @app.get("/health")
@@ -218,6 +298,10 @@ def reprocess(lead_id: int, request: Request, bg: BackgroundTasks, s: Session = 
     log_event(s, lead.id, "reprocess_requested")
     s.commit()
     st = request.app.state
+    if st.settings.inline_processing:
+        process_lead(lead.id, st.session_factory, st.graph, st.settings)
+        s.expire_all()
+        return s.get(Lead, lead.id)
     bg.add_task(process_lead, lead.id, st.session_factory, st.graph, st.settings)
     return lead
 

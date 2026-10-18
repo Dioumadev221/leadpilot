@@ -41,6 +41,7 @@ class Lead(Base):
     job_title: Mapped[str | None] = mapped_column(String(200))
     message: Mapped[str] = mapped_column(Text, default="")
     raw: Mapped[dict] = mapped_column(JSON, default=dict)
+    client_ip_hash: Mapped[str | None] = mapped_column(String(64), index=True)  # rate limiting, never the raw IP
 
     status: Mapped[str] = mapped_column(String(32), default=LeadStatus.RECEIVED, index=True)
     attempts: Mapped[int] = mapped_column(Integer, default=0)

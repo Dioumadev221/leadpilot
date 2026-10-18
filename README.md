@@ -1,8 +1,17 @@
-# LeadPilot — multi-agent lead qualification & CRM automation
+<p align="center"><img src="app/static/logo.svg" width="64" alt="LeadPilot"></p>
 
-Inbound leads arrive from forms, Upwork, Malt, LinkedIn or any webhook. LeadPilot **enriches** them, has an LLM agent **qualify** them against your ideal customer profile, **scores** them with an auditable rule table, **filters spam**, drafts the **CRM note and first reply**, and waits for a **human to approve** before anything is written to **HubSpot or Zoho**. Every Monday an analyst agent writes the **weekly pipeline report**.
+# LeadPilot
 
-![Approval console](docs/screenshots/approval-queue.png)
+**Every inbound lead qualified in seconds. Your CRM stays clean.**
+
+LeadPilot is a multi-agent system for B2B service teams. Leads arrive from forms, Upwork, Malt, LinkedIn or any webhook. LeadPilot **enriches** each one, has an AI agent **qualify** it against your ideal customer profile, **scores** it with an auditable rule table, **filters spam** and drafts the **CRM note and first reply**. Nothing is written to **HubSpot or Zoho** until a human approves it. Every week an analyst agent writes the **pipeline report**.
+
+![LeadPilot inbox: a qualified lead with its pipeline run and score breakdown](docs/media/01-inbox-lead-detail.png)
+
+| | |
+|---|---|
+| ![Weekly report](docs/media/03-reports.png) | ![All leads](docs/media/04-leads.png) |
+| ![Landing page](docs/media/02-landing.png) | ![Integrations](docs/media/05-integrations.png) |
 
 ## Why it is built this way
 
@@ -36,7 +45,7 @@ flowchart LR
     DB --> R[Weekly analyst agent<br/>SQL metrics + LLM narrative] --> SL[Slack / console]
 ```
 
-**Stack:** Python 3.12, FastAPI, LangGraph, LangChain (OpenAI or Anthropic), SQLAlchemy 2 + PostgreSQL, APScheduler, httpx, Docker, GitHub Actions.
+**Stack:** Python 3.12, FastAPI, LangGraph, LangChain (OpenAI, Anthropic or any OpenAI-compatible model), SQLAlchemy 2 + PostgreSQL, APScheduler, httpx, Docker, GitHub Actions. Runs serverless on Vercel or as a container.
 
 ## Features
 
@@ -45,7 +54,9 @@ flowchart LR
 - **Qualifier agent:** intent, ICP fit, budget, timeline, use case, next step, reasoning quoting the lead (Pydantic structured output).
 - **Scoring:** 9 rules, 0–100, hot / warm / cold, thresholds via env.
 - **Writer agent:** CRM note + first reply email tailored to the lead.
-- **Approval console** (`/`): queue, score breakdown, editable draft, approve/reject, audit trail, report view.
+- **Web app** (`/app`): inbox with approval queue, pipeline run per lead with timings, score breakdown, editable draft, approve/reject, audit trail, reports, integrations and API pages. Light and dark themes, mobile layout.
+- **Product site** (`/`): landing page with live demo link.
+- **Security:** API key on private workspaces, webhook shared secret, SSRF guard on website enrichment (private and internal addresses refused, redirects checked hop by hop), per-IP limit on the public demo.
 - **CRM sync:** HubSpot (search → create/patch contact, note associated to contact, lifecycle stage), Zoho (OAuth refresh, upsert on Email, note). Retries on 429/5xx with `Retry-After`.
 - **Jobs:** DB-backed queue with atomic `received → processing` claim, 3 attempts then `failed`; weekly report on cron.
 - **Report:** volume and week-over-week change, tiers, sources, top use cases, approval rate, median review time, hot leads waiting, 3 actions.
@@ -56,7 +67,7 @@ flowchart LR
 ```bash
 cp .env.example .env            # put your OPENAI_API_KEY, or set LLM_PROVIDER=none
 docker compose up --build       # API + PostgreSQL
-open http://localhost:8000      # console; enter API_KEY via the key button
+open http://localhost:8000/app  # the app asks for API_KEY once
 ```
 
 Without Docker:
@@ -91,24 +102,32 @@ curl -X POST "https://accounts.zoho.com/oauth/v2/token?grant_type=authorization_
 
 Then `CRM_PROVIDER=zoho`, `ZOHO_CLIENT_ID`, `ZOHO_CLIENT_SECRET`, `ZOHO_REFRESH_TOKEN`, `ZOHO_DC` (`com`, `eu`, `in`...).
 
-## Deploy (Render, free)
+## Deploy
 
-1. Push this repo to GitHub.
-2. Render → New → **Blueprint** → select the repo. `render.yaml` creates the Docker web service and a PostgreSQL database, and generates `API_KEY` and `WEBHOOK_SECRET`.
-3. Add `OPENAI_API_KEY` and set `LLM_PROVIDER=openai` in the service environment.
-4. Open the URL, click the key button, paste `API_KEY` (visible in the Render env tab).
+### Vercel + Neon (serverless, free tier)
 
-Free tier notes: the web service sleeps after 15 min idle (first request wakes it); Render free Postgres expires after 30 days, so for a long-lived demo point `DATABASE_URL` at a free Neon or Supabase database instead. Run a single instance: the worker and scheduler live in-process.
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDioumadev221%2Fleadpilot)
+
+1. Create a Postgres database on [Neon](https://neon.tech) and copy the **pooled** connection string.
+2. Import the repo in Vercel. `vercel.json` sets the function timeout and a daily cron on `/api/cron/daily`.
+3. Environment variables: `DATABASE_URL`, `CRON_SECRET` (random string), `API_KEY`, `WEBHOOK_SECRET`, and your LLM and CRM keys. For a public demo set `DEMO_MODE=true` and leave `API_KEY` empty.
+4. Deploy. Set `PUBLIC_URL` to the final domain so link previews show the product image.
+
+On Vercel the pipeline runs inside the request (a few seconds per lead, bounded graph), and the daily cron drains anything left in the queue and writes the report. In demo mode the cron also resets the sample workspace.
+
+### Docker / Render
+
+`docker compose up` or Render → New → **Blueprint** (`render.yaml` creates the web service and Postgres). On a long-running host the in-process worker and the weekly scheduler are on, so a single instance is enough.
 
 ## Tests
 
-18 tests: pipeline routing (hot / cold / spam / disposable), deterministic scoring, LLM failure fallback, full API flow to CRM, idempotency, webhook field mapping, retries → failed, report metrics, auth, and HubSpot/Zoho request shapes against mocked HTTP. CI runs them on SQLite **and** PostgreSQL, then builds the image.
+32 tests: pipeline routing (hot / cold / spam / disposable), deterministic scoring, LLM failure fallback, full API flow to CRM, idempotency, webhook field mapping, retries → failed, report metrics, auth, cron secret and demo reset, demo rate limit, serverless inline processing, SSRF guard, and HubSpot/Zoho request shapes against mocked HTTP. CI runs them on SQLite **and** PostgreSQL, then builds the image.
 
 ## Project layout
 
 ```
 app/
-  main.py         FastAPI app, worker thread, scheduler, endpoints
+  main.py         FastAPI app, worker thread, scheduler, cron, endpoints
   graph.py        LangGraph pipeline
   agents.py       qualifier + writer agents and their fallbacks
   scoring.py      deterministic rule table
@@ -116,6 +135,7 @@ app/
   services.py     job claim/processing, approval, rejection
   report.py       weekly metrics + analyst agent
   crm/            CRMAdapter protocol, HubSpot, Zoho, mock
-  static/         approval console (vanilla JS, no build step)
+  demo.py         sample workspace for the public demo
+  static/         product site + web app (vanilla JS, no build step)
 tests/
 ```

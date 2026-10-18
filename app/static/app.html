@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LeadPilot · Inbox</title>
+<meta name="description" content="LeadPilot workspace: AI lead qualification, deterministic scoring and human-approved CRM sync.">
+<meta property="og:title" content="LeadPilot">
+<meta property="og:description" content="Every inbound lead qualified in seconds. Nothing reaches your CRM until you approve it.">
+<meta property="og:image" content="/static/img/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/static/logo.svg" type="image/svg+xml">
+<style>
+  @font-face { font-family: Inter; src: url(/static/fonts/inter.woff2) format("woff2"); font-weight: 100 900; font-display: swap; }
+  @font-face { font-family: "JetBrains Mono"; src: url(/static/fonts/jetbrains-mono.woff2) format("woff2"); font-weight: 100 800; font-display: swap; }
+  :root {
+    --bg: #ffffff; --bg-2: #f6f8fb; --bg-3: #eef2f7; --text: #0b1220; --muted: #5b6577; --faint: #8a93a5; --border: #e4e8ef;
+    --brand: #2563eb; --brand-2: #0ea5e9; --brand-soft: #eff6ff; --brand-ink: #ffffff;
+    --hot: #dc2626; --hot-soft: #fef2f2; --warm: #c2410c; --warm-soft: #fff7ed; --cold: #0369a1; --cold-soft: #f0f9ff;
+    --ok: #047857; --ok-soft: #ecfdf5; --spam: #6b7280; --spam-soft: #f3f4f6; --amber: #a16207; --amber-soft: #fefce8;
+    --shadow: 0 1px 2px rgba(16,24,40,.05), 0 1px 3px rgba(16,24,40,.06);
+    --shadow-lg: 0 12px 32px rgba(16,24,40,.12);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0b0f17; --bg-2: #0f1520; --bg-3: #161d2b; --text: #e7ebf3; --muted: #9aa4b8; --faint: #6b7489; --border: #222a39;
+      --brand: #60a5fa; --brand-2: #38bdf8; --brand-soft: #0f1e3a; --brand-ink: #0b0f17;
+      --hot: #f87171; --hot-soft: #2a1013; --warm: #fb923c; --warm-soft: #2a170b; --cold: #7dd3fc; --cold-soft: #0b1f2c;
+      --ok: #34d399; --ok-soft: #06261c; --spam: #9ca3af; --spam-soft: #1a1f29; --amber: #facc15; --amber-soft: #2a240a;
+      --shadow: 0 1px 2px rgba(0,0,0,.4); --shadow-lg: 0 12px 32px rgba(0,0,0,.5);
+    }
+  }
+  * { box-sizing: border-box }
+  html, body { height: 100% }
+  body { margin: 0; font: 14px/1.5 Inter, system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased }
+  a { color: var(--brand); text-decoration: none }
+  code, .mono { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 12.5px }
+  button { font: inherit; cursor: pointer }
+  .shell { display: grid; grid-template-columns: 248px 1fr; height: 100vh }
+
+  /* sidebar */
+  aside { border-right: 1px solid var(--border); background: var(--bg-2); display: flex; flex-direction: column; padding: 18px 14px; gap: 14px }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; padding: 2px 6px; color: var(--text) }
+  .brand img { width: 30px; height: 30px }
+  .ws { display: flex; gap: 10px; align-items: center; padding: 10px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg) }
+  .ws .av { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--brand-2), var(--brand)); color: #fff; font-weight: 700; display: grid; place-items: center; font-size: 12px }
+  .ws b { display: block; font-size: 13px } .ws span { font-size: 12px; color: var(--muted) }
+  .pill-sample { font-size: 11px; font-weight: 600; color: var(--amber); background: var(--amber-soft); border: 1px solid color-mix(in srgb, var(--amber) 30%, transparent); padding: 0 6px; border-radius: 6px }
+  nav.side { display: flex; flex-direction: column; gap: 2px }
+  nav.side button { display: flex; align-items: center; gap: 10px; border: 0; background: none; color: var(--muted); padding: 8px 10px; border-radius: 9px; text-align: left; font-weight: 500 }
+  nav.side button:hover { background: var(--bg-3); color: var(--text) }
+  nav.side button.on { background: var(--brand-soft); color: var(--brand) }
+  nav.side svg { width: 18px; height: 18px; flex: none }
+  nav.side .count { margin-left: auto; font-size: 11.5px; font-weight: 600; background: var(--brand); color: var(--brand-ink); border-radius: 99px; padding: 0 7px; min-width: 20px; text-align: center }
+  .side-foot { margin-top: auto; border-top: 1px solid var(--border); padding: 12px 8px 0; font-size: 12px; color: var(--muted); display: grid; gap: 4px }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block; margin-right: 6px; box-shadow: 0 0 0 3px color-mix(in srgb, #10b981 20%, transparent) }
+
+  /* main */
+  main { display: flex; flex-direction: column; min-width: 0; height: 100vh }
+  .top { display: flex; align-items: center; gap: 12px; padding: 16px 26px; border-bottom: 1px solid var(--border) }
+  .top h1 { font-size: 18px; margin: 0 } .top p { margin: 0; color: var(--muted); font-size: 13px }
+  .top .sp { flex: 1 }
+  .btn { border: 1px solid var(--border); background: var(--bg); color: var(--text); border-radius: 9px; padding: 8px 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 7px; box-shadow: var(--shadow) }
+  .btn:hover { border-color: color-mix(in srgb, var(--brand) 45%, var(--border)) }
+  .btn.primary { background: var(--brand); border-color: var(--brand); color: var(--brand-ink) }
+  .btn.primary:hover { filter: brightness(1.07) }
+  .btn.ok { background: var(--ok); border-color: var(--ok); color: #fff }
+  .btn.ghost { box-shadow: none }
+  .btn.danger { color: var(--hot) }
+  .btn svg { width: 16px; height: 16px }
+  .btn[disabled] { opacity: .55; cursor: default }
+  .view { flex: 1; min-height: 0; overflow: auto }
+
+  /* inbox */
+  .inbox { display: grid; grid-template-columns: minmax(320px, 400px) 1fr; height: 100% }
+  .list { border-right: 1px solid var(--border); overflow: auto; background: var(--bg) }
+  .tabs { display: flex; gap: 4px; padding: 10px 12px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 2; flex-wrap: wrap }
+  .tabs button { border: 0; background: none; color: var(--muted); padding: 5px 9px; border-radius: 7px; font-size: 12.5px; font-weight: 600 }
+  .tabs button.on { background: var(--bg-3); color: var(--text) }
+  .tabs button i { font-style: normal; color: var(--faint); margin-left: 3px; font-weight: 500 }
+  .row { display: grid; grid-template-columns: 42px 1fr auto; gap: 11px; padding: 12px 14px; border-bottom: 1px solid var(--border); cursor: pointer; align-items: center }
+  .row:hover { background: var(--bg-2) } .row.sel { background: var(--brand-soft) }
+  .sc { width: 42px; height: 42px; border-radius: 11px; display: grid; place-items: center; font-weight: 700; font-size: 15px; font-variant-numeric: tabular-nums }
+  .t-hot { color: var(--hot); background: var(--hot-soft) } .t-warm { color: var(--warm); background: var(--warm-soft) }
+  .t-cold { color: var(--cold); background: var(--cold-soft) } .t-spam { color: var(--spam); background: var(--spam-soft) }
+  .row .who { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+  .row .sub { font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+  .row .meta { text-align: right; font-size: 11.5px; color: var(--faint); white-space: nowrap }
+  .chip { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 600; padding: 1px 8px; border-radius: 99px; border: 1px solid var(--border); color: var(--muted); background: var(--bg) }
+  .chip.hot { color: var(--hot); background: var(--hot-soft); border-color: transparent } .chip.warm { color: var(--warm); background: var(--warm-soft); border-color: transparent }
+  .chip.cold { color: var(--cold); background: var(--cold-soft); border-color: transparent } .chip.spam { color: var(--spam); background: var(--spam-soft); border-color: transparent }
+  .chip.ok { color: var(--ok); background: var(--ok-soft); border-color: transparent } .chip.brand { color: var(--brand); background: var(--brand-soft); border-color: transparent }
+  .detail { overflow: auto; padding: 22px 26px 40px; background: var(--bg-2) }
+  .empty { display: grid; place-items: center; height: 100%; color: var(--muted); text-align: center; padding: 40px }
+  .card { background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; margin-bottom: 14px; box-shadow: var(--shadow) }
+  .card h3 { margin: 0 0 12px; font-size: 11.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 8px }
+  .card h3 .r { margin-left: auto; text-transform: none; letter-spacing: 0; font-weight: 500; color: var(--faint) }
+  .lead-head { display: flex; gap: 14px; align-items: center; flex-wrap: wrap }
+  .lead-head .av { width: 46px; height: 46px; border-radius: 12px; background: var(--bg-3); display: grid; place-items: center; font-weight: 700; color: var(--muted) }
+  .lead-head h2 { margin: 0; font-size: 18px } .lead-head .m { color: var(--muted); font-size: 13px }
+  .lead-head .acts { margin-left: auto; display: flex; gap: 8px }
+  .quote { margin: 14px 0 0; padding: 12px 14px; border-left: 3px solid var(--brand); background: var(--bg-2); border-radius: 0 10px 10px 0; white-space: pre-wrap }
+  .steps { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0; position: relative }
+  .step { position: relative; padding-top: 30px; text-align: center; font-size: 12px; color: var(--muted) }
+  .step::before { content: ""; position: absolute; top: 11px; left: 0; right: 0; height: 2px; background: var(--border) }
+  .step:first-child::before { left: 50% } .step:last-child::before { right: 50% }
+  .step .b { position: absolute; top: 0; left: calc(50% - 12px); width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--bg-3); color: var(--faint); border: 2px solid var(--bg); z-index: 1 }
+  .step.done .b { background: var(--ok); color: #fff } .step.wait .b { background: var(--amber); color: #fff } .step.stop .b { background: var(--spam); color: #fff }
+  .step.done::before { background: color-mix(in srgb, var(--ok) 55%, var(--border)) }
+  .step b { display: block; color: var(--text); font-weight: 600; font-size: 12.5px }
+  .step .b svg { width: 13px; height: 13px }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px }
+  .kv { display: grid; grid-template-columns: 120px 1fr; gap: 7px 12px; font-size: 13.5px } .kv > div:nth-child(odd) { color: var(--muted) }
+  .big { display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px } .big b { font-size: 34px; letter-spacing: -.02em; font-variant-numeric: tabular-nums }
+  .bd { display: grid; grid-template-columns: 1fr 90px 44px; gap: 10px; align-items: center; padding: 5px 0; font-size: 13px; border-bottom: 1px dashed var(--border) }
+  .bd:last-child { border: 0 }
+  .bar { height: 6px; border-radius: 99px; background: var(--bg-3); overflow: hidden; position: relative }
+  .bar i { position: absolute; top: 0; bottom: 0; border-radius: 99px }
+  .pos { color: var(--ok); font-weight: 600; text-align: right; font-variant-numeric: tabular-nums } .neg { color: var(--hot); font-weight: 600; text-align: right; font-variant-numeric: tabular-nums }
+  .reason { margin: 12px 0 0; color: var(--muted); font-size: 13px }
+  label.f { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin: 12px 0 5px }
+  input, textarea, select { width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 9px; padding: 9px 11px; font: inherit }
+  input:focus, textarea:focus, select:focus { outline: 2px solid color-mix(in srgb, var(--brand) 35%, transparent); border-color: var(--brand) }
+  textarea { min-height: 96px; resize: vertical; line-height: 1.5 }
+  .draft-acts { display: flex; gap: 8px; margin-top: 14px; align-items: center; flex-wrap: wrap }
+  .draft-acts .note { color: var(--faint); font-size: 12px; margin-left: auto }
+  .events { font-size: 12.5px } .events div { display: grid; grid-template-columns: 140px 150px 1fr; gap: 10px; padding: 5px 0; border-bottom: 1px solid var(--border); color: var(--muted) }
+  .events b { color: var(--text); font-weight: 600 }
+  .events code { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; color: var(--faint) }
+  .warn { color: var(--warm); font-size: 12.5px; margin-top: 8px }
+
+  /* reports */
+  .page { padding: 24px 26px 48px; max-width: 1180px }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 14px }
+  .kpi { background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 15px 16px; box-shadow: var(--shadow) }
+  .kpi span { color: var(--muted); font-size: 12.5px } .kpi b { display: block; font-size: 26px; letter-spacing: -.02em; font-variant-numeric: tabular-nums; margin-top: 2px }
+  .kpi small { color: var(--faint); font-size: 12px }
+  .hbar { display: grid; grid-template-columns: 150px 1fr 34px; gap: 10px; align-items: center; padding: 6px 0; font-size: 13px }
+  .hbar .bar { height: 8px } .hbar .bar i { left: 0; background: linear-gradient(90deg, var(--brand-2), var(--brand)) }
+  .stack { display: flex; height: 12px; border-radius: 99px; overflow: hidden; background: var(--bg-3); margin: 8px 0 10px }
+  .stack i { display: block; height: 100% }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted) } .legend i { display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: 5px }
+  ol.acts { margin: 6px 0 0; padding-left: 20px } ol.acts li { margin: 6px 0 }
+
+  /* integrations */
+  .ints { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px }
+  .int { display: flex; flex-direction: column; gap: 8px }
+  .int .hd { display: flex; align-items: center; gap: 11px } .int .ic { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; font-weight: 800; color: #fff; font-size: 14px }
+  .int .hd b { font-size: 15px } .int .hd .chip { margin-left: auto }
+  .int p { margin: 0; color: var(--muted); font-size: 13.5px }
+  pre { margin: 6px 0 0; background: #0b1220; color: #dbe5f5; border-radius: 10px; padding: 12px 14px; overflow: auto; font-size: 12px; line-height: 1.55 }
+  .endpoint { display: grid; grid-template-columns: 64px 1fr; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13.5px; align-items: baseline }
+  .endpoint .m { font-family: "JetBrains Mono", monospace; font-size: 11.5px; font-weight: 700; color: var(--brand) }
+  .endpoint span { color: var(--muted) }
+
+  /* modal */
+  .modal { position: fixed; inset: 0; background: rgba(8,12,20,.45); display: none; align-items: flex-start; justify-content: center; padding: 6vh 16px; z-index: 50; overflow: auto }
+  .modal.on { display: flex }
+  .sheet { background: var(--bg); border-radius: 16px; width: min(640px, 100%); box-shadow: var(--shadow-lg); border: 1px solid var(--border) }
+  .sheet .hd { padding: 18px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center }
+  .sheet .hd h2 { margin: 0; font-size: 16px } .sheet .hd button { margin-left: auto; border: 0; background: none; color: var(--muted); font-size: 20px }
+  .sheet .bd2 { padding: 6px 22px 20px } .sheet .ft { padding: 14px 22px; border-top: 1px solid var(--border); display: flex; gap: 8px; align-items: center; background: var(--bg-2); border-radius: 0 0 16px 16px }
+  .presets { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px } .presets button { border: 1px solid var(--border); background: var(--bg-2); border-radius: 99px; padding: 4px 11px; font-size: 12.5px; color: var(--muted) }
+  .presets button:hover { color: var(--text); border-color: var(--brand) }
+  .f2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px }
+  .hint { font-size: 12.5px; color: var(--muted); background: var(--brand-soft); border-radius: 10px; padding: 9px 12px; margin-top: 14px }
+  .toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-weight: 500; opacity: 0; transition: .2s; z-index: 60; box-shadow: var(--shadow-lg) }
+  .toast.on { opacity: 1; transform: translateX(-50%) }
+  .spin { width: 15px; height: 15px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: sp .7s linear infinite; display: inline-block }
+  @keyframes sp { to { transform: rotate(360deg) } }
+  .mob { display: none }
+
+  @media (max-width: 1100px) { .grid2 { grid-template-columns: 1fr } .steps { grid-template-columns: repeat(3, 1fr); row-gap: 14px } .step::before { display: none } }
+  @media (max-width: 860px) {
+    .shell { grid-template-columns: 1fr } aside { display: none } .mob { display: flex }
+    .inbox { grid-template-columns: 1fr; height: auto } .list { max-height: 46vh; border-right: 0; border-bottom: 1px solid var(--border) }
+    .top { padding: 12px 16px; flex-wrap: wrap } .detail, .page { padding: 16px } .events div { grid-template-columns: 1fr }
+    .lead-head .acts { margin-left: 0 } .f2 { grid-template-columns: 1fr } .kv { grid-template-columns: 105px 1fr }
+  }
+  .mobnav { display: none; gap: 4px; padding: 8px 12px; border-bottom: 1px solid var(--border); overflow-x: auto }
+  .mobnav button { border: 1px solid var(--border); background: var(--bg); border-radius: 99px; padding: 5px 12px; font-size: 13px; white-space: nowrap; color: var(--muted) }
+  .mobnav button.on { color: var(--brand); border-color: var(--brand) }
+  @media (max-width: 860px) { .mobnav { display: flex } }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside>
+    <a class="brand" href="/"><img src="/static/logo.svg" alt="">LeadPilot</a>
+    <div class="ws"><div class="av">NS</div><div><b id="wsName">Workspace</b><span><span id="wsSub">Workspace</span> <span class="pill-sample" id="sampleTag" hidden>Sample data</span></span></div></div>
+    <nav class="side" id="sidenav"></nav>
+    <div class="side-foot">
+      <div><span class="dot"></span>All systems operational</div>
+      <div id="footMeta">…</div>
+    </div>
+  </aside>
+  <main>
+    <div class="top">
+      <a class="brand mob" href="/"><img src="/static/logo.svg" alt="" style="width:26px;height:26px"></a>
+      <div><h1 id="pageTitle">Inbox</h1><p id="pageSub"></p></div>
+      <div class="sp"></div>
+      <a class="btn ghost" id="talkBtn" href="{{CONTACT_URL}}" target="_blank" rel="noopener">Deploy for your team</a>
+      <button class="btn primary" onclick="openNew()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>New lead</button>
+    </div>
+    <div class="mobnav" id="mobnav"></div>
+    <div class="view" id="view"></div>
+  </main>
+</div>
+
+<div class="modal" id="modal" onclick="if(event.target===this)closeNew()">
+  <div class="sheet">
+    <div class="hd"><h2>New inbound lead</h2><button onclick="closeNew()" aria-label="Close">×</button></div>
+    <div class="bd2">
+      <div class="presets"><span class="muted" style="font-size:12.5px;color:var(--muted);align-self:center">Try:</span>
+        <button onclick="preset(0)">Hot B2B request</button><button onclick="preset(1)">Vague enquiry</button><button onclick="preset(2)">Vendor spam</button><button onclick="preset(3)">French lead</button></div>
+      <div class="f2">
+        <div><label class="f">Work email *</label><input id="n_email" type="email" autocomplete="off"></div>
+        <div><label class="f">Company</label><input id="n_company"></div>
+        <div><label class="f">Full name</label><input id="n_name"></div>
+        <div><label class="f">Job title</label><input id="n_title"></div>
+      </div>
+      <label class="f">Message</label><textarea id="n_msg" style="min-height:120px"></textarea>
+      <label class="f">Source</label>
+      <select id="n_source"><option>website</option><option>upwork</option><option>malt</option><option>linkedin</option><option>referral</option></select>
+      <div class="hint" id="demoHint" hidden>This is the live production pipeline. Your lead is enriched, qualified, scored and drafted for real, then waits for approval. The sandbox CRM and this sample workspace reset every day.</div>
+    </div>
+    <div class="ft"><span id="newStatus" style="color:var(--muted);font-size:13px"></span><span style="flex:1"></span><button class="btn" onclick="closeNew()">Cancel</button><button class="btn primary" id="sendBtn" onclick="submitLead()">Run pipeline</button></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const ICON = {
+  inbox: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5h13L22 12v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6z"/></svg>',
+  leads: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg>',
+  report: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>',
+  plug: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 2v6M15 2v6M6 8h12v4a6 6 0 0 1-12 0zM12 18v4"/></svg>',
+  code: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2 2"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  dash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M7 12h10"/></svg>',
+};
+const PAGES = [
+  {id: "inbox", label: "Inbox", icon: "inbox", sub: "Qualified leads waiting for your approval before anything reaches the CRM."},
+  {id: "leads", label: "All leads", icon: "leads", sub: "Every inbound lead, its score and where it ended up."},
+  {id: "reports", label: "Reports", icon: "report", sub: "Weekly pipeline report: numbers from the database, narrative from the analyst agent."},
+  {id: "integrations", label: "Integrations", icon: "plug", sub: "Where leads come from and where approved leads go."},
+  {id: "api", label: "API", icon: "code", sub: "Everything in the console is available over a REST API."},
+];
+const TIER_COLOR = {hot: "var(--hot)", warm: "var(--warm)", cold: "var(--cold)", spam: "var(--spam)"};
+const STATUS = {pending_approval: ["Needs review", "brand"], synced: ["In CRM", "ok"], rejected: ["Rejected", ""], auto_rejected: ["Spam filtered", "spam"], received: ["Processing", ""], processing: ["Processing", ""], failed: ["Failed", "hot"]};
+const USE_CASE_ORDER = [];
+let META = {}, page = "inbox", tab = "pending_approval", selected = null, leadsCache = [];
+
+function ago(iso) {
+  const d = new Date(/[zZ]|[+-]\d\d:\d\d$/.test(iso) ? iso : iso + "Z"), s = (Date.now() - d) / 1000;
+  if (s < 60) return "just now"; if (s < 3600) return Math.floor(s / 60) + "m ago";
+  if (s < 86400) return Math.floor(s / 3600) + "h ago"; return Math.floor(s / 86400) + "d ago";
+}
+function when(iso) { const d = new Date(/[zZ]|[+-]\d\d:\d\d$/.test(iso) ? iso : iso + "Z"); return d.toLocaleString([], {month: "short", day: "numeric", hour: "2-digit", minute: "2-digit"}) }
+function initials(l) { const n = [l.first_name, l.last_name].filter(Boolean); return (n.length ? n.map(x => x[0]).join("") : l.email[0]).toUpperCase().slice(0, 2) }
+function nm(l) { return [l.first_name, l.last_name].filter(Boolean).join(" ") || l.email }
+function toast(t) { const el = $("toast"); el.textContent = t; el.classList.add("on"); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove("on"), 2600) }
+function apiKey() { try { return localStorage.getItem("lp_api_key") || "" } catch (e) { return "" } }
+async function api(path, opts = {}, retried = false) {
+  const key = apiKey();
+  const r = await fetch(path, {...opts, headers: {"Content-Type": "application/json", ...(key ? {"X-API-Key": key} : {}), ...(opts.headers || {})}});
+  if (r.status === 401 && !retried) {
+    // Private workspace: ask for the API key once, keep it in this browser only.
+    if (!api.asking) api.asking = Promise.resolve(window.prompt("This workspace is private. Enter its API key:"))
+      .then(k => { if (k) try { localStorage.setItem("lp_api_key", k.trim()) } catch (e) {} return k });
+    const k = await api.asking; setTimeout(() => { api.asking = null }, 0);
+    if (k) return api(path, opts, true);
+  }
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(typeof body.detail === "string" ? body.detail : (r.status === 401 ? "This workspace needs an API key." : "Request failed (" + r.status + ")"));
+  return body;
+}
+
+function renderNav(counts = {}) {
+  const html = PAGES.map(p => `<button class="${p.id === page ? "on" : ""}" onclick="go('${p.id}')">${ICON[p.icon]}<span>${p.label}</span>${p.id === "inbox" && counts.pending ? `<span class="count">${counts.pending}</span>` : ""}</button>`).join("");
+  $("sidenav").innerHTML = html;
+  $("mobnav").innerHTML = PAGES.map(p => `<button class="${p.id === page ? "on" : ""}" onclick="go('${p.id}')">${p.label}</button>`).join("");
+}
+function go(p) {
+  page = p; selected = null;
+  if (p === "inbox") tab = "pending_approval"; if (p === "leads") tab = "";
+  const def = PAGES.find(x => x.id === p); $("pageTitle").textContent = def.label; $("pageSub").textContent = def.sub;
+  document.title = "LeadPilot · " + def.label;
+  history.replaceState(null, "", p === "inbox" ? "/app" : "/app#" + p);
+  render();
+}
+async function render() {
+  renderNav({pending: META.pending});
+  if (page === "inbox" || page === "leads") return renderInbox();
+  if (page === "reports") return renderReports();
+  if (page === "integrations") return renderIntegrations();
+  if (page === "api") return renderApi();
+}
+
+/* ---------- inbox ---------- */
+async function refreshCounts() {
+  const st = await api("/api/stats");
+  META.pending = st.by_status.pending_approval || 0; META.by_status = st.by_status;
+  renderNav({pending: META.pending});
+  return st;
+}
+async function renderInbox(keepSel) {
+  const view = $("view");
+  if (!view.querySelector(".inbox")) view.innerHTML = `<div class="inbox"><section class="list" id="list"></section><section class="detail" id="detail"><div class="empty">Select a lead to see what the agents found.</div></section></div>`;
+  const st = await refreshCounts();
+  const bs = st.by_status;
+  const tabs = page === "inbox"
+    ? [["pending_approval", "Needs review", bs.pending_approval], ["synced", "In CRM", bs.synced], ["rejected", "Rejected", bs.rejected], ["auto_rejected", "Spam", bs.auto_rejected]]
+    : [["", "All", Object.values(bs).reduce((a, b) => a + b, 0)], ["pending_approval", "Needs review", bs.pending_approval], ["synced", "In CRM", bs.synced], ["auto_rejected", "Spam", bs.auto_rejected]];
+  const leads = await api("/api/leads" + (tab ? `?status=${tab}` : ""));
+  leadsCache = leads;
+  $("list").innerHTML = `<div class="tabs">${tabs.map(([v, l, n]) => `<button class="${v === tab ? "on" : ""}" onclick="tab='${v}';selected=null;renderInbox()">${l}<i>${n || 0}</i></button>`).join("")}</div>` +
+    (leads.length ? leads.map(l => {
+      const q = l.qualification || {};
+      return `<div class="row ${l.id === selected ? "sel" : ""}" onclick="openLead(${l.id})">
+        <div class="sc t-${l.tier || "spam"}">${l.score ?? "…"}</div>
+        <div style="min-width:0"><div class="who">${esc(l.company || nm(l))}</div>
+          <div class="sub">${esc(q.use_case && q.use_case !== "Unclear" ? q.use_case + " · " : "")}${esc(q.need_summary || l.message)}</div></div>
+        <div class="meta">${ago(l.created_at)}<br><span class="chip ${l.tier || ""}" style="margin-top:4px">${esc(l.tier || "…")}</span></div></div>`;
+    }).join("") : `<div class="empty" style="height:auto;padding:60px 20px">Nothing here yet.<br><br><button class="btn" onclick="openNew()">Send a test lead</button></div>`);
+  if (!keepSel && !selected && leads.length && window.innerWidth > 860) openLead(leads[0].id);
+}
+
+function stepper(l) {
+  const ev = Object.fromEntries((l.events || []).filter(e => e.kind.startsWith("agent.")).map(e => [e.kind.slice(6), e.detail]));
+  const q = l.qualification || {}, spam = l.status === "auto_rejected";
+  const mk = (cls, icon, title, sub) => `<div class="step ${cls}"><div class="b">${ICON[icon]}</div><b>${title}</b>${sub}</div>`;
+  const ms = (k) => ev[k] && ev[k].ms != null ? (ev[k].ms < 1 ? "<1 ms" : `${Math.round(ev[k].ms)} ms`) : "";
+  const approval = l.status === "synced" ? mk("done", "check", "Approved", esc(l.reviewed_by || ""))
+    : l.status === "rejected" ? mk("stop", "x", "Rejected", esc(l.reviewed_by || ""))
+    : spam ? mk("stop", "dash", "Skipped", "spam") : mk("wait", "clock", "Approval", "waiting for you");
+  const crm = l.status === "synced" ? mk("done", "check", "CRM sync", `${esc(l.crm_provider === "mock" ? "Sandbox CRM" : l.crm_provider)} #${esc(l.crm_id)}`)
+    : mk("", "dash", "CRM sync", spam || l.status === "rejected" ? "never written" : "after approval");
+  return `<div class="steps">
+    ${mk(ev.enrich ? "done" : "", "check", "Enrich", ms("enrich"))}
+    ${mk(ev.qualify ? "done" : "", "check", "Qualify", (q.mode === "llm" ? "LLM · " : "rules · ") + ms("qualify"))}
+    ${mk(ev.score ? (spam ? "stop" : "done") : "", spam ? "x" : "check", "Score", spam ? "spam · stopped" : ms("score"))}
+    ${mk(ev.draft ? "done" : "", ev.draft ? "check" : "dash", "Draft", ev.draft ? ((l.crm_draft || {}).mode === "llm" ? "LLM · " : "template · ") + ms("draft") : "not needed")}
+    ${approval}${crm}</div>`;
+}
+
+async function openLead(id) {
+  selected = id;
+  document.querySelectorAll(".row").forEach(r => r.classList.toggle("sel", r.getAttribute("onclick") === `openLead(${id})`));
+  const l = await api(`/api/leads/${id}`);
+  const q = l.qualification || {}, e = l.enrichment || {}, d = l.crm_draft || {}, site = e.site || {};
+  const editable = l.status === "pending_approval";
+  const [stLabel, stCls] = STATUS[l.status] || [l.status, ""];
+  const maxAbs = Math.max(25, ...(l.score_breakdown || []).map(i => Math.abs(i.points)));
+  $("detail").innerHTML = `
+    <div class="card">
+      <div class="lead-head">
+        <div class="av">${esc(initials(l))}</div>
+        <div><h2>${esc(nm(l))}${l.company ? ` <span style="color:var(--muted);font-weight:500">· ${esc(l.company)}</span>` : ""}</h2>
+          <div class="m">${esc(l.job_title || "No title")} · ${esc(l.email)} · via ${esc(l.source)} · ${when(l.created_at)}</div></div>
+        <div class="acts"><span class="chip ${stCls}">${stLabel}</span></div>
+      </div>
+      <div class="quote">${esc(l.message || "(empty message)")}</div>
+      ${(l.warnings || []).map(w => `<div class="warn">⚠ ${esc(w)}</div>`).join("")}
+      ${l.last_error ? `<div class="warn">Last error: ${esc(l.last_error)}</div>` : ""}
+    </div>
+    <div class="card"><h3>Pipeline run <span class="r">bounded graph · max 4 agent steps</span></h3>${stepper(l)}</div>
+    <div class="grid2">
+      <div class="card"><h3>Qualifier agent <span class="r">${q.mode === "llm" ? "LLM · structured output" : "rules engine"}</span></h3>
+        <div class="kv">
+          <div>Use case</div><div><b>${esc(q.use_case)}</b></div>
+          <div>Intent</div><div>${esc(q.intent)}</div>
+          <div>ICP fit</div><div>${esc(q.icp_fit)}</div>
+          <div>Budget</div><div>${esc(q.budget_amount || q.budget_signal)}</div>
+          <div>Timeline</div><div>${esc((q.timeline || "").replace("_", " "))}</div>
+          <div>Next step</div><div>${esc(q.recommended_action)}</div>
+        </div>
+        <p class="reason">${esc(q.need_summary)}</p></div>
+      <div class="card"><h3>Lead score <span class="r">deterministic · auditable</span></h3>
+        <div class="big"><b style="color:${TIER_COLOR[l.tier] || "inherit"}">${l.score ?? "–"}</b><span class="chip ${l.tier}">${esc(l.tier)}</span><span style="color:var(--faint);font-size:12.5px">hot ≥ ${META.hot_threshold}, warm ≥ ${META.warm_threshold}</span></div>
+        ${(l.score_breakdown || []).map(i => {
+          const w = Math.abs(i.points) / maxAbs * 50;
+          return `<div class="bd"><span>${esc(i.why)}</span><div class="bar"><i style="${i.points >= 0 ? `left:50%;width:${w}%;background:var(--ok)` : `right:50%;width:${w}%;background:var(--hot)`}"></i></div><span class="${i.points > 0 ? "pos" : "neg"}">${i.points > 0 ? "+" : ""}${i.points}</span></div>`;
+        }).join("")}
+        <h3 style="margin-top:16px">Enrichment</h3>
+        <div class="kv"><div>Email domain</div><div>${esc(e.email_domain)} <span class="chip">${esc(e.domain_type)}</span></div>
+          <div>Website</div><div>${e.website ? esc(e.website.replace(/^https?:\/\//, "")) : "–"} ${site.reachable ? '<span class="chip ok">live</span>' : site.reachable === false ? '<span class="chip">not reachable</span>' : ""}</div>
+          ${site.title ? `<div>Site title</div><div>${esc(site.title)}</div>` : ""}</div>
+      </div>
+    </div>
+    ${l.crm_draft ? `<div class="card"><h3>Writer agent · CRM draft <span class="r">${editable ? "edit anything before approving" : "as written to the CRM"}</span></h3>
+      <div class="f2"><div><label class="f" style="margin-top:0">CRM stage</label><select id="stage" ${editable ? "" : "disabled"}>${[["sql", "Sales-qualified lead"], ["mql", "Marketing-qualified lead"], ["lead", "Lead"]].map(([v, t]) => `<option value="${v}" ${d.stage === v ? "selected" : ""}>${t}</option>`).join("")}</select></div>
+      <div><label class="f" style="margin-top:0">Reply subject</label><input id="subj" value="${esc(d.reply_subject)}" ${editable ? "" : "disabled"}></div></div>
+      <label class="f">CRM note</label><textarea id="note" ${editable ? "" : "disabled"}>${esc(d.note)}</textarea>
+      <label class="f">First reply to the lead</label><textarea id="body" style="min-height:180px" ${editable ? "" : "disabled"}>${esc(d.reply_body)}</textarea>
+      ${editable ? `<div class="draft-acts"><button class="btn ok" id="apBtn" onclick="approve(${l.id})">${ICON.check.replace('stroke-width="3"', 'stroke-width="3" style="width:15px;height:15px"')}Approve &amp; sync to CRM</button>
+        <button class="btn danger" onclick="reject(${l.id})">Reject</button><span class="note">Nothing is written to ${META.crm === "mock" ? "the sandbox CRM" : META.crm} until you approve.</span></div>` : ""}</div>` : ""}
+    <div class="card"><h3>Audit trail <span class="r">every agent step and human decision</span></h3><div class="events">
+      ${(l.events || []).map(ev => `<div><span>${when(ev.at)}</span><b>${esc(ev.kind)}</b><code>${esc(JSON.stringify(ev.detail))}</code></div>`).join("")}</div></div>`;
+  if (window.innerWidth <= 860) $("detail").scrollIntoView({behavior: "smooth"});
+}
+async function approve(id) {
+  const b = $("apBtn"); b.disabled = true; b.innerHTML = '<span class="spin"></span>Syncing…';
+  try {
+    const l = await api(`/api/leads/${id}/approve`, {method: "POST", body: JSON.stringify({reviewer: "you", stage: $("stage").value, note: $("note").value, reply_subject: $("subj").value, reply_body: $("body").value})});
+    toast(`Synced to ${META.crm === "mock" ? "sandbox CRM" : META.crm} · record #${l.crm_id}`);
+    await renderInbox(true); openLead(id);
+  } catch (e) { toast(e.message); b.disabled = false; b.textContent = "Approve & sync to CRM" }
+}
+async function reject(id) {
+  const reason = prompt("Why are you rejecting this lead?", "Not a fit right now"); if (reason === null) return;
+  try { await api(`/api/leads/${id}/reject`, {method: "POST", body: JSON.stringify({reviewer: "you", reason})}); toast("Lead rejected, nothing written to the CRM"); await renderInbox(true); openLead(id) }
+  catch (e) { toast(e.message) }
+}
+
+/* ---------- new lead ---------- */
+const PRESETS = [
+  {email: "maya.chen@lumenhealth.io", company: "Lumen Health", name: "Maya Chen", title: "Head of Operations", source: "website",
+   msg: "We need an AI agent that answers patient FAQ emails from our knowledge base and hands complex cases to staff. Budget around $12k, we would like it live next month."},
+  {email: "jordan88@gmail.com", company: "", name: "Jordan", title: "", source: "upwork", msg: "Hi, curious what AI could do for my business. Just exploring."},
+  {email: "sales@rankfast-seo.net", company: "RankFast", name: "Kevin", title: "", source: "website", msg: "We can get your site to Google page 1 with premium backlinks and guest posts. Reply for our price list."},
+  {email: "c.martin@groupe-alto.fr", company: "Groupe Alto", name: "Claire Martin", title: "Directrice des opérations", source: "malt", msg: "Besoin d'un agent IA pour trier les demandes entrantes et mettre à jour notre CRM Zoho. Budget 8000€, démarrage ce mois-ci."},
+];
+function preset(i) { const p = PRESETS[i]; $("n_email").value = p.email; $("n_company").value = p.company; $("n_name").value = p.name; $("n_title").value = p.title; $("n_msg").value = p.msg; $("n_source").value = p.source }
+function openNew() { $("modal").classList.add("on"); if (!$("n_email").value) preset(0); $("newStatus").textContent = ""; setTimeout(() => $("n_msg").focus(), 50) }
+function closeNew() { $("modal").classList.remove("on") }
+async function submitLead() {
+  const [first, ...rest] = $("n_name").value.trim().split(/\s+/);
+  const b = $("sendBtn"); b.disabled = true; b.innerHTML = '<span class="spin"></span>Running agents…'; $("newStatus").textContent = "";
+  const t0 = performance.now();
+  try {
+    let l = await api("/api/leads", {method: "POST", body: JSON.stringify({email: $("n_email").value.trim(), company: $("n_company").value || null,
+      first_name: first || null, last_name: rest.join(" ") || null, job_title: $("n_title").value || null, message: $("n_msg").value, source: $("n_source").value})});
+    for (let i = 0; i < 20 && ["received", "processing"].includes(l.status); i++) { await new Promise(r => setTimeout(r, 700)); l = await api(`/api/leads/${l.id}`) }
+    closeNew(); toast(`Processed in ${((performance.now() - t0) / 1000).toFixed(1)} s · score ${l.score} (${l.tier})`);
+    page = "leads"; tab = ""; $("pageTitle").textContent = "All leads"; $("pageSub").textContent = PAGES[1].sub; selected = l.id;
+    await renderInbox(true); openLead(l.id);
+  } catch (e) { $("newStatus").textContent = e.message }
+  b.disabled = false; b.textContent = "Run pipeline";
+}
+
+/* ---------- reports ---------- */
+async function renderReports() {
+  let r = null; try { r = await api("/api/reports/latest") } catch {}
+  const view = $("view");
+  if (!r) { view.innerHTML = `<div class="page"><div class="card empty" style="height:auto">No report yet.<br><br><button class="btn primary" onclick="genReport()">Generate the report</button></div></div>`; return }
+  const m = r.metrics, n = r.narrative, tiers = m.by_tier, total = Math.max(1, m.total_leads);
+  const maxUC = Math.max(1, ...Object.values(m.top_use_cases)), maxSrc = Math.max(1, ...Object.values(m.by_source));
+  const tierOrder = ["hot", "warm", "cold", "spam"];
+  view.innerHTML = `<div class="page">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+      <div><div style="font-size:20px;font-weight:700;letter-spacing:-.01em">${esc(n.headline)}</div>
+      <div style="color:var(--muted);font-size:13px">${when(r.period_start)} → ${when(r.period_end)} · generated ${ago(r.created_at)} · narrative by ${n.mode === "llm" ? "analyst agent (LLM)" : "analyst template"}</div></div>
+      <span style="flex:1"></span><button class="btn" id="genBtn" onclick="genReport()">Regenerate</button></div>
+    <div class="kpis">
+      <div class="kpi"><span>Inbound leads</span><b>${m.total_leads}</b><small>${m.wow_change_pct != null ? `${m.wow_change_pct > 0 ? "+" : ""}${m.wow_change_pct}% vs previous week` : "first week"}</small></div>
+      <div class="kpi"><span>Hot leads</span><b style="color:var(--hot)">${tiers.hot || 0}</b><small>score ≥ ${META.hot_threshold}</small></div>
+      <div class="kpi"><span>Average score</span><b>${m.avg_score ?? "–"}</b><small>spam excluded</small></div>
+      <div class="kpi"><span>Pushed to CRM</span><b style="color:var(--ok)">${m.synced_to_crm}</b><small>${m.approval_rate_pct != null ? m.approval_rate_pct + "% approval rate" : "–"}</small></div>
+      <div class="kpi"><span>Spam filtered</span><b>${m.spam_filtered}</b><small>never reached a human</small></div>
+      <div class="kpi"><span>Median time to review</span><b>${m.median_hours_to_review ?? "–"}${m.median_hours_to_review != null ? "h" : ""}</b><small>${m.awaiting_review} still waiting</small></div>
+    </div>
+    <div class="grid2" style="grid-template-columns:1.3fr 1fr">
+      <div class="card"><h3>Summary</h3><p style="margin:0 0 12px">${esc(n.summary)}</p>
+        ${n.risks && n.risks.length ? `<h3 style="margin-top:14px">Risks</h3><ul style="margin:0;padding-left:20px">${n.risks.map(x => `<li style="margin:5px 0">${esc(x)}</li>`).join("")}</ul>` : ""}
+        <h3 style="margin-top:14px">Actions for next week</h3><ol class="acts">${n.actions.map(x => `<li>${esc(x)}</li>`).join("")}</ol></div>
+      <div><div class="card"><h3>Lead quality</h3>
+          <div class="stack">${tierOrder.map(t => tiers[t] ? `<i style="width:${tiers[t] / total * 100}%;background:${TIER_COLOR[t]}"></i>` : "").join("")}</div>
+          <div class="legend">${tierOrder.map(t => `<span><i style="background:${TIER_COLOR[t]}"></i>${t} ${tiers[t] || 0}</span>`).join("")}</div></div>
+        <div class="card"><h3>Hot leads waiting</h3>${m.hot_leads_waiting.length ? m.hot_leads_waiting.map(h => `<div class="bd" style="grid-template-columns:1fr auto;cursor:pointer" onclick="page='inbox';tab='pending_approval';go('inbox');setTimeout(()=>openLead(${h.id}),300)"><span><b>${esc(h.company)}</b> <span style="color:var(--muted)">· ${esc(h.use_case)}</span></span><span class="chip hot">${h.score}</span></div>`).join("") : `<span style="color:var(--muted)">None. Every hot lead has been handled.</span>`}</div></div>
+    </div>
+    <div class="grid2">
+      <div class="card"><h3>What leads ask for</h3>${Object.entries(m.top_use_cases).map(([k, v]) => `<div class="hbar"><span>${esc(k)}</span><div class="bar"><i style="width:${v / maxUC * 100}%"></i></div><b>${v}</b></div>`).join("")}</div>
+      <div class="card"><h3>Lead sources</h3>${Object.entries(m.by_source).map(([k, v]) => `<div class="hbar"><span>${esc(k)}</span><div class="bar"><i style="width:${v / maxSrc * 100}%"></i></div><b>${v}</b></div>`).join("")}</div>
+    </div></div>`;
+}
+async function genReport() {
+  const b = $("genBtn"); if (b) { b.disabled = true; b.innerHTML = '<span class="spin"></span>Generating…' }
+  try { await api("/api/reports/generate", {method: "POST"}); toast("Report generated from live data"); renderReports() } catch (e) { toast(e.message); if (b) { b.disabled = false; b.textContent = "Regenerate" } }
+}
+
+/* ---------- integrations ---------- */
+function renderIntegrations() {
+  const origin = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? "https://your-domain" : location.origin;
+  const hook = `${origin}/api/webhooks/lead?source=website`;
+  const crmOn = META.crm;
+  const card = (bg, ic, name, status, statusCls, body) => `<div class="card int"><div class="hd"><div class="ic" style="background:${bg}">${ic}</div><b>${name}</b><span class="chip ${statusCls}">${status}</span></div>${body}</div>`;
+  $("view").innerHTML = `<div class="page"><div class="ints">
+    ${card("#ff7a59", "H", "HubSpot", crmOn === "hubspot" ? "Connected" : "Available", crmOn === "hubspot" ? "ok" : "", `<p>Approved leads are upserted as contacts (matched on email), with lifecycle stage, lead status and a note holding the qualification, score breakdown and drafted reply.</p><p style="font-size:12.5px">Private app token · scopes <code>crm.objects.contacts.read/write</code></p>`)}
+    ${card("#e42527", "Z", "Zoho CRM", crmOn === "zoho" ? "Connected" : "Available", crmOn === "zoho" ? "ok" : "", `<p>Leads module upsert with duplicate check on email, lead status mapped from the tier, qualification note attached. OAuth refresh-token flow, any data centre.</p>`)}
+    ${card("linear-gradient(135deg,#0ea5e9,#2563eb)", "S", "Sandbox CRM", crmOn === "mock" ? "Active" : "Off", crmOn === "mock" ? "ok" : "", `<p>A built-in CRM table used by this public workspace, so you can approve leads and see the full sync without touching a real CRM.</p>`)}
+    ${card("#0f172a", "{}", "Webhook intake", "Live", "ok", `<p>Point any form at this URL: Typeform, Tally, Webflow, WordPress, Zapier, Make, n8n. JSON or form posts; common field names are mapped automatically.</p>
+      <pre>curl -X POST "${esc(hook)}" \\
+  -H "Content-Type: application/json" \\
+  -d '{"email":"cto@acme.io","name":"Alex Martin",
+       "company":"Acme","title":"CTO",
+       "message":"We need a support agent on our docs, budget $10k"}'</pre>`)}
+    ${card("#4a154b", "#", "Slack", "Available", "", `<p>Instant alert in a channel when a hot lead lands, and the weekly pipeline report every Monday morning.</p>`)}
+    ${card("#10a37f", "AI", "LLM provider", META.llm === "rules" ? "Rules mode" : "Connected", META.llm === "rules" ? "" : "ok", `<p>OpenAI, Anthropic, or any OpenAI-compatible endpoint (Groq, Gemini, OpenRouter, Azure, self-hosted). If the model fails, the pipeline falls back to deterministic rules instead of stopping.</p><p style="font-size:12.5px">Current: <code>${esc(META.llm)}</code></p>`)}
+  </div></div>`;
+}
+function renderApi() {
+  const eps = [
+    ["POST", "/api/leads", "Create a lead and run the pipeline. Supports Idempotency-Key."],
+    ["POST", "/api/webhooks/lead", "Form/webhook intake with field mapping and shared secret."],
+    ["GET", "/api/leads", "List leads, filter by status or tier."],
+    ["GET", "/api/leads/{id}", "Lead with qualification, score breakdown, draft and audit trail."],
+    ["POST", "/api/leads/{id}/approve", "Approve (with edits) and sync to the CRM."],
+    ["POST", "/api/leads/{id}/reject", "Reject with a reason. Nothing is written to the CRM."],
+    ["POST", "/api/leads/{id}/reprocess", "Run the agents again."],
+    ["GET", "/api/reports/latest", "Latest weekly pipeline report."],
+    ["POST", "/api/reports/generate", "Generate a report from live data."],
+  ];
+  $("view").innerHTML = `<div class="page"><div class="card"><h3>REST API <span class="r"><a href="/docs" target="_blank">Interactive docs (OpenAPI) →</a></span></h3>
+    ${eps.map(([m, p, d]) => `<div class="endpoint"><span class="m">${m}</span><div><code>${p}</code><br><span>${d}</span></div></div>`).join("")}
+    <p style="color:var(--muted);font-size:13px;margin:14px 0 0">Authenticate with <code>X-API-Key</code> on private workspaces. Webhooks use <code>X-Webhook-Secret</code>.</p></div></div>`;
+}
+
+/* ---------- boot ---------- */
+(async function boot() {
+  try { META = await api("/api/meta") } catch { META = {} }
+  $("wsName").textContent = META.workspace || "Workspace";
+  $("sampleTag").hidden = !META.demo; $("wsSub").textContent = META.demo ? "Demo ·" : "Production"; $("demoHint").hidden = !META.demo;
+  $("footMeta").textContent = `CRM: ${META.crm === "mock" ? "Sandbox" : META.crm} · Agents: ${META.llm === "rules" ? "rules engine" : META.llm}`;
+  if (META.contact_url && META.contact_url !== "#") $("talkBtn").href = META.contact_url; else $("talkBtn").hidden = true;
+  const h = location.hash.slice(1); go(PAGES.some(p => p.id === h) ? h : "inbox");
+  addEventListener("hashchange", () => { const k = location.hash.slice(1) || "inbox"; if (k !== page && PAGES.some(p => p.id === k)) go(k) });
+  setInterval(() => { if (document.visibilityState === "visible") refreshCounts().catch(() => {}) }, 20000);
+})();
+</script>
+</body>
+</html>

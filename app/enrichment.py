@@ -5,8 +5,10 @@
 Swap in Clearbit/Apollo/People Data Labs here if the client pays for one.
 """
 
+import ipaddress
 import re
-from urllib.parse import urlparse
+import socket
+from urllib.parse import urljoin, urlparse
 
 import httpx
 
@@ -57,12 +59,36 @@ def _clean(text: str, limit: int) -> str:
     return re.sub(r"\s+", " ", text).strip()[:limit]
 
 
-def fetch_site_meta(url: str, client: httpx.Client) -> dict:
+def is_public_host(host: str) -> bool:
+    """SSRF guard: lead-supplied URLs must resolve to public IPs only."""
+    if not host or host == "localhost" or host.endswith((".local", ".internal", ".localhost")):
+        return False
     try:
-        resp = client.get(url, follow_redirects=True, headers={"User-Agent": "LeadPilot/1.0 (+lead enrichment)"})
+        infos = socket.getaddrinfo(host, 443, proto=socket.IPPROTO_TCP)
+    except (socket.gaierror, UnicodeError):
+        return False
+    for info in infos:
+        ip = ipaddress.ip_address(info[4][0])
+        if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast \
+                or ip.is_unspecified:
+            return False
+    return True
+
+
+def fetch_site_meta(url: str, client: httpx.Client, max_redirects: int = 3) -> dict:
+    headers = {"User-Agent": "LeadPilot/1.0 (+lead enrichment)"}
+    try:
+        for _ in range(max_redirects + 1):
+            if urlparse(url).scheme not in ("http", "https") or not is_public_host(urlparse(url).hostname or ""):
+                return {"reachable": False, "error": "blocked_host"}
+            resp = client.get(url, follow_redirects=False, headers=headers)
+            if resp.is_redirect and "location" in resp.headers:
+                url = urljoin(url, resp.headers["location"])
+                continue
+            break
     except httpx.HTTPError as exc:
         return {"reachable": False, "error": type(exc).__name__}
-    if resp.status_code >= 400:
+    if resp.status_code >= 400 or resp.is_redirect:
         return {"reachable": False, "status_code": resp.status_code}
     html = resp.text[:200_000]
     title = _TITLE_RE.search(html)
@@ -89,7 +115,5 @@ def enrich_lead(lead: dict, *, fetch_website: bool, client: httpx.Client | None)
         "site": None,
     }
     if website and fetch_website and client is not None:
-        host = urlparse(website).hostname or ""
-        if host and not host.endswith((".local", ".internal")) and host not in {"localhost", "127.0.0.1"}:
-            out["site"] = fetch_site_meta(website, client)
+        out["site"] = fetch_site_meta(website, client)
     return out

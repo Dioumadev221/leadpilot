@@ -6,6 +6,8 @@ The graph never writes to the CRM. It stops at `pending_approval` and a human de
 """
 
 import logging
+import time
+from functools import wraps
 from typing import Any, TypedDict
 
 import httpx
@@ -31,6 +33,17 @@ class LeadState(TypedDict, total=False):
     status: str
     warnings: list[str]
     trace: list[dict]
+
+
+def timed(fn):
+    """Adds the step's wall-clock duration to the trace entry it appends."""
+    @wraps(fn)
+    def run(state):
+        t0 = time.perf_counter()
+        out = fn(state)
+        out["trace"][-1]["ms"] = round((time.perf_counter() - t0) * 1000, 1)
+        return out
+    return run
 
 
 def build_graph(settings: Settings, llm: BaseChatModel | None = None, http_client: httpx.Client | None = None):
@@ -85,10 +98,10 @@ def build_graph(settings: Settings, llm: BaseChatModel | None = None, http_clien
         return END if state["status"] == "auto_rejected" else "draft"
 
     g = StateGraph(LeadState)
-    g.add_node("enrich", enrich)
-    g.add_node("qualify", qualify)
-    g.add_node("score", score)
-    g.add_node("draft", draft)
+    g.add_node("enrich", timed(enrich))
+    g.add_node("qualify", timed(qualify))
+    g.add_node("score", timed(score))
+    g.add_node("draft", timed(draft))
     g.add_edge(START, "enrich")
     g.add_edge("enrich", "qualify")
     g.add_edge("qualify", "score")

@@ -14,6 +14,7 @@ from langchain_core.language_models.chat_models import BaseChatModel
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, sessionmaker
 
+from app.llm import structured
 from app.models import Lead, LeadStatus, Report
 from app.notify import post_slack
 from app.schemas import ReportNarrative
@@ -79,7 +80,7 @@ def compute_metrics(s: Session, start: datetime, end: datetime) -> dict:
 
 def narrate_template(m: dict) -> ReportNarrative:
     tiers = m["by_tier"]
-    wow = f" ({m['wow_change_pct']:+.1f}% vs previous week)" if m["wow_change_pct"] is not None else ""
+    wow = f" ({m['wow_change_pct']:+g}% vs previous week)" if m["wow_change_pct"] is not None else ""
     summary = (
         f"{m['total_leads']} inbound leads this week{wow}: {tiers.get('hot', 0)} hot, {tiers.get('warm', 0)} warm, "
         f"{tiers.get('cold', 0)} cold, {m['spam_filtered']} spam filtered automatically. "
@@ -96,7 +97,7 @@ def narrate_template(m: dict) -> ReportNarrative:
         risks.append(f"Median review time is {m['median_hours_to_review']}h.")
         actions.append("Block two 15-minute review slots per day to bring review time under 24h.")
     if m["top_use_cases"]:
-        actions.append(f"Publish one case study or Upwork portfolio item on '{next(iter(m['top_use_cases']))}'.")
+        actions.append(f"Publish a case study on '{next(iter(m['top_use_cases']))}', the most requested service.")
     if m["by_source"]:
         best = next(iter(m["by_source"]))
         actions.append(f"Double down on '{best}', the top lead source this week.")
@@ -110,8 +111,8 @@ def narrate_template(m: dict) -> ReportNarrative:
 def narrate(m: dict, llm: BaseChatModel | None) -> tuple[ReportNarrative, str]:
     if llm is not None:
         try:
-            structured = llm.with_structured_output(ReportNarrative)
-            out = structured.invoke([("system", ANALYST_SYSTEM), ("human", json.dumps(m, default=str))])
+            chain = structured(llm, ReportNarrative)
+            out = chain.invoke([("system", ANALYST_SYSTEM), ("human", json.dumps(m, default=str))])
             return out, "llm"
         except Exception as exc:
             log.warning("analyst LLM failed, using template: %s", exc)

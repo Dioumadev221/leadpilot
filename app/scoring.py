@@ -43,7 +43,7 @@ def score_lead(lead: dict, enrichment: dict, q: dict) -> tuple[int, list[dict]]:
     add("icp_fit", RULES["icp_fit"][q["icp_fit"]], f"{q['icp_fit']} ICP fit")
     add("budget", RULES["budget"][q["budget_signal"]],
         f"budget {q['budget_signal']}" + (f" ({q['budget_amount']})" if q.get("budget_amount") else ""))
-    add("timeline", RULES["timeline"][q["timeline"]], f"timeline: {q['timeline']}")
+    add("timeline", RULES["timeline"][q["timeline"]], f"timeline: {q['timeline'].replace('_', ' ')}")
     if len((lead.get("message") or "").strip()) < 20:
         add("short_message", RULES["short_message"], "message too short to act on")
 

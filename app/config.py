@@ -1,3 +1,4 @@
+import os
 from functools import lru_cache
 from typing import Literal
 
@@ -10,6 +11,18 @@ class Settings(BaseSettings):
     app_name: str = "LeadPilot"
     database_url: str = "sqlite:///./leadpilot.db"
 
+    # Product / workspace
+    workspace_name: str = "Northwind Studio"
+    sender_name: str = "The Northwind Studio team"  # signs the drafted replies
+    contact_url: str = "#"       # where "Talk to us" buttons point (Upwork profile, Calendly...)
+    public_url: str = ""         # absolute base URL, used for link previews (og:image)
+    demo_mode: bool = False      # public sandbox: sample data, mock CRM, rate-limited submissions, daily reset
+    demo_submissions_per_hour: int = 6
+
+    # Serverless (Vercel): no background threads, leads are processed inside the request.
+    inline_processing: bool = bool(os.environ.get("VERCEL"))
+    cron_secret: str = ""        # Vercel Cron sends "Authorization: Bearer <CRON_SECRET>"
+
     # Security. Empty API_KEY disables auth (local dev / public demo only).
     api_key: str = ""
     webhook_secret: str = ""
@@ -18,6 +31,8 @@ class Settings(BaseSettings):
     llm_provider: Literal["openai", "anthropic", "none"] = "none"
     llm_model: str = "gpt-4o-mini"
     openai_api_key: str = ""
+    # Any OpenAI-compatible endpoint (Groq, Gemini, OpenRouter, Azure, local vLLM...).
+    openai_base_url: str = ""
     anthropic_api_key: str = ""
 
     # Who you sell to. The qualifier agent scores every lead against this.
@@ -43,7 +58,7 @@ class Settings(BaseSettings):
     warm_threshold: int = 45
 
     # Background jobs
-    run_worker: bool = True
+    run_worker: bool = not os.environ.get("VERCEL")
     worker_interval_s: float = 3.0
     max_attempts: int = 3
     report_cron_day: str = "mon"
