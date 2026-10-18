@@ -5,7 +5,7 @@ Hébergement : **Vercel** (le site et l'API) + **Neon** (la base de données). L
 ## Étape 1 : la base de données (Neon)
 
 1. Va sur https://neon.tech et connecte-toi avec GitHub.
-2. Clique **New Project**. Nom : `leadpilot`. Région : la plus proche (Europe, Frankfurt).
+2. Clique **New Project**. Nom : `leadpilot`. Région : Europe (Frankfurt), la même que le site.
 3. Sur la page du projet, clique **Connect**.
 4. Coche **Connection pooling** (important).
 5. Copie la ligne qui commence par `postgresql://...`. C'est ton `DATABASE_URL`. Garde-la de côté.

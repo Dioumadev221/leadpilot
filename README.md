@@ -2,7 +2,9 @@
 
 # LeadPilot
 
-**Every inbound lead qualified in seconds. Your CRM stays clean.**
+**Qualify every lead in seconds. Approve what hits your CRM.**
+
+**Live demo:** https://leadpilot-rust-iota.vercel.app · sample workspace, resets daily
 
 LeadPilot is a multi-agent system for B2B service teams. Leads arrive from forms, Upwork, Malt, LinkedIn or any webhook. LeadPilot **enriches** each one, has an AI agent **qualify** it against your ideal customer profile, **scores** it with an auditable rule table, **filters spam** and drafts the **CRM note and first reply**. Nothing is written to **HubSpot or Zoho** until a human approves it. Every week an analyst agent writes the **pipeline report**.
 

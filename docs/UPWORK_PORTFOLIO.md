@@ -12,7 +12,7 @@ Founder & AI Engineer: product, multi-agent architecture, backend, CRM integrati
 
 ## Project description
 
-LeadPilot qualifies every inbound lead in seconds. AI agents enrich the lead, read it against the ideal customer profile and extract budget, timeline and intent. A rule table scores it 0–100 with a visible breakdown, spam is filtered, and the CRM note and first reply are drafted. Nothing reaches HubSpot or Zoho until a human approves it. A weekly report shows pipeline volume, lead quality and next actions. Built with LangGraph, FastAPI and PostgreSQL. Live demo: LIVE_URL
+LeadPilot qualifies every inbound lead in seconds. AI agents enrich the lead, read it against the ideal customer profile and extract budget, timeline and intent. A rule table scores it 0–100 with a visible breakdown, spam is filtered, and the CRM note and first reply are drafted. Nothing reaches HubSpot or Zoho until a human approves it. A weekly report shows pipeline volume, lead quality and next actions. Built with LangGraph, FastAPI and PostgreSQL. Live demo: https://leadpilot-rust-iota.vercel.app
 
 ## Skills
 
@@ -30,5 +30,5 @@ LangGraph · LangChain · FastAPI · Python · PostgreSQL · HubSpot API · Zoho
 
 ## Links
 
-- Live demo: LIVE_URL
+- Live demo: https://leadpilot-rust-iota.vercel.app
 - Code: https://github.com/Dioumadev221/leadpilot
