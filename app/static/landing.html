@@ -10,215 +10,297 @@
 <meta property="og:image" content="/static/img/og.png">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#17150f">
 <link rel="icon" href="/static/logo.svg" type="image/svg+xml">
 <style>
-  @font-face { font-family: Inter; src: url(/static/fonts/inter.woff2) format("woff2"); font-weight: 100 900; font-display: swap; }
-  @font-face { font-family: "JetBrains Mono"; src: url(/static/fonts/jetbrains-mono.woff2) format("woff2"); font-weight: 100 800; font-display: swap; }
+  @font-face { font-family: "Space Grotesk"; src: url(/static/fonts/space-grotesk.woff2) format("woff2"); font-weight: 300 700; font-display: swap; }
+  @font-face { font-family: "IBM Plex Sans"; src: url(/static/fonts/plex-sans.woff2) format("woff2"); font-weight: 100 700; font-display: swap; }
+  @font-face { font-family: "IBM Plex Mono"; src: url(/static/fonts/plex-mono-400.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+  @font-face { font-family: "IBM Plex Mono"; src: url(/static/fonts/plex-mono-500.woff2) format("woff2"); font-weight: 500; font-display: swap; }
+  @font-face { font-family: "IBM Plex Mono"; src: url(/static/fonts/plex-mono-600.woff2) format("woff2"); font-weight: 600 700; font-display: swap; }
   :root {
-    --bg: #ffffff; --bg-2: #f6f8fb; --bg-3: #eef2f7; --text: #0b1220; --muted: #556072; --faint: #8a93a5; --border: #e4e8ef;
-    --brand: #2563eb; --brand-2: #0ea5e9; --brand-soft: #eff6ff; --ink: #fff;
-    --hot: #dc2626; --hot-soft: #fef2f2; --ok: #047857; --ok-soft: #ecfdf5; --amber: #a16207; --amber-soft: #fefce8;
+    --paper: #f7f4ee; --paper-2: #efebe3; --card: #fffdf9; --ink: #17150f; --ink-2: #24211a; --ink-3: #322e25;
+    --text: #17150f; --muted: #5f594d; --faint: #8f887a; --line: #e0dacd;
+    --on-ink: #f5efe3; --on-ink-muted: #a8a193; --on-ink-line: #3a352b;
+    --signal: #f2541b; --signal-2: #ff7a45; --signal-soft: #fde7dc;
+    --hot: #d92d20; --hot-soft: #fde8e6; --warm: #b45309; --warm-soft: #fdf0dc; --cold: #3a6b8a; --cold-soft: #e5eef4;
+    --ok: #1f7a4d; --ok-soft: #e2f2e9; --spam: #7a756b; --spam-soft: #ebe8e1;
+    --display: "Space Grotesk", "IBM Plex Sans", system-ui, sans-serif; --mono: "IBM Plex Mono", ui-monospace, monospace;
   }
   @media (prefers-color-scheme: dark) {
-    :root { --bg: #0b0f17; --bg-2: #0f1520; --bg-3: #161d2b; --text: #e7ebf3; --muted: #9aa4b8; --faint: #6b7489; --border: #222a39;
-      --brand: #60a5fa; --brand-2: #38bdf8; --brand-soft: #0f1e3a; --ink: #0b0f17; --hot: #f87171; --hot-soft: #2a1013; --ok: #34d399; --ok-soft: #06261c; --amber: #facc15; --amber-soft: #2a240a }
+    :root { --paper: #12110d; --paper-2: #18170f; --card: #1c1a14; --text: #f0ebe0; --muted: #b0a999; --faint: #7d776a; --line: #2f2b22;
+      --signal-soft: #3a1a0c; --hot: #ff6b5e; --hot-soft: #3a1512; --warm: #f0a24a; --warm-soft: #33230e; --cold: #8fbad6; --cold-soft: #13222d;
+      --ok: #5fd39a; --ok-soft: #10281c; --spam: #a39d90; --spam-soft: #24221b }
   }
   * { box-sizing: border-box }
-  body { margin: 0; font: 16px/1.6 Inter, system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased }
+  html { scroll-behavior: smooth }
+  body { margin: 0; font: 16.5px/1.6 "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--text); background: var(--paper); -webkit-font-smoothing: antialiased }
   a { color: inherit; text-decoration: none }
-  .wrap { max-width: 1140px; margin: 0 auto; padding: 0 24px }
-  header { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border) }
-  header .wrap { display: flex; align-items: center; gap: 28px; height: 64px }
-  .logo { display: flex; align-items: center; gap: 10px; font-weight: 750; font-size: 18px; letter-spacing: -.01em } .logo img { width: 32px; height: 32px }
-  header nav { display: flex; gap: 22px; color: var(--muted); font-size: 15px } header nav a:hover { color: var(--text) }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 28px }
+  .mono { font-family: var(--mono) }
+  .tag { font-family: var(--mono); font-size: 12.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--signal); font-weight: 500 }
+  h1, h2, h3 { font-family: var(--display); letter-spacing: -.025em; font-weight: 700 }
+
+  /* header + hero on ink */
+  .top { background: var(--ink); color: var(--on-ink); position: relative; overflow: hidden }
+  .top::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(var(--on-ink-line) 1px, transparent 1px), linear-gradient(90deg, var(--on-ink-line) 1px, transparent 1px); background-size: 56px 56px; opacity: .35; mask-image: radial-gradient(900px 520px at 75% 30%, #000, transparent 75%) }
+  header { position: relative; z-index: 2 }
+  header .wrap { display: flex; align-items: center; gap: 30px; height: 72px; border-bottom: 1px solid var(--on-ink-line) }
+  .logo { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 700; font-size: 19px; letter-spacing: -.02em } .logo img { width: 30px; height: 30px }
+  header nav { display: flex; gap: 26px; font-size: 15px; color: var(--on-ink-muted) } header nav a:hover { color: var(--on-ink) }
   .sp { flex: 1 }
-  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 10px; font-weight: 600; font-size: 15px; border: 1px solid var(--border); background: var(--bg); transition: .15s }
-  .btn:hover { border-color: color-mix(in srgb, var(--brand) 50%, var(--border)) }
-  .btn.primary { background: var(--brand); border-color: var(--brand); color: var(--ink) } .btn.primary:hover { filter: brightness(1.08) }
-  .btn.lg { padding: 14px 22px; font-size: 16.5px; border-radius: 12px }
-  .hero { text-align: center; padding: 84px 0 40px; background: radial-gradient(1000px 420px at 50% -80px, var(--brand-soft), transparent) }
-  .eyebrow { display: inline-block; font-size: 14px; font-weight: 600; color: var(--brand); background: var(--brand-soft); padding: 6px 14px; border-radius: 99px; margin-bottom: 22px }
-  h1 { font-size: clamp(38px, 6vw, 68px); line-height: 1.04; letter-spacing: -.035em; margin: 0 auto 22px; max-width: 950px; font-weight: 800 }
-  .grad { background: linear-gradient(90deg, var(--brand-2), var(--brand) 60%, #7c3aed); -webkit-background-clip: text; background-clip: text; color: transparent }
-  .lead { font-size: clamp(17px, 2vw, 20px); color: var(--muted); max-width: 760px; margin: 0 auto 32px }
-  .ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap }
-  .checks { display: flex; gap: 22px; justify-content: center; flex-wrap: wrap; margin-top: 26px; color: var(--muted); font-size: 15px }
-  .checks span::before { content: "✓"; color: var(--ok); font-weight: 800; margin-right: 7px }
-  .frame { margin: 56px auto 0; max-width: 1100px; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; box-shadow: 0 30px 80px -20px rgba(37,99,235,.28), 0 10px 30px rgba(15,23,42,.08); background: var(--bg-2) }
-  .frame .bar { display: flex; align-items: center; gap: 7px; padding: 11px 14px; border-bottom: 1px solid var(--border); background: var(--bg) }
-  .frame .bar i { width: 11px; height: 11px; border-radius: 50%; background: var(--bg-3) }
-  .frame .bar span { margin-left: 12px; font-size: 13px; color: var(--muted); border: 1px solid var(--border); padding: 3px 12px; border-radius: 7px; font-family: "JetBrains Mono", monospace }
-  .frame img { display: block; width: 100% }
-  section { padding: 92px 0 }
-  section.alt { background: var(--bg-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border) }
-  .kicker { color: var(--brand); font-weight: 700; font-size: 14px; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 10px }
-  h2 { font-size: clamp(30px, 4vw, 44px); letter-spacing: -.03em; line-height: 1.1; margin: 0 0 16px; font-weight: 800 }
-  .sub { color: var(--muted); font-size: 18px; max-width: 700px; margin: 0 }
-  .center { text-align: center } .center .sub { margin: 0 auto }
-  .cards3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 44px }
-  .c { background: var(--bg); border: 1px solid var(--border); border-radius: 16px; padding: 26px }
-  .c h3 { margin: 0 0 8px; font-size: 19px; letter-spacing: -.01em } .c p { margin: 0; color: var(--muted); font-size: 15.5px }
-  .c .ic { width: 42px; height: 42px; border-radius: 11px; display: grid; place-items: center; margin-bottom: 16px; font-size: 20px; background: var(--brand-soft); color: var(--brand) }
-  .flow { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-top: 48px; counter-reset: s }
-  .flow .c { padding: 22px; position: relative } .flow .c::before { counter-increment: s; content: counter(s); display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; background: var(--brand); color: var(--ink); font-weight: 800; font-size: 14px; margin-bottom: 14px }
-  .flow .c h3 { font-size: 17px } .flow .c p { font-size: 14.5px }
-  .split { display: grid; grid-template-columns: 1fr 1.05fr; gap: 64px; align-items: center }
-  .split.rev > :first-child { order: 2 }
-  ul.ticks { list-style: none; padding: 0; margin: 24px 0 0; display: grid; gap: 13px } ul.ticks li { padding-left: 30px; position: relative; color: var(--muted) }
-  ul.ticks li b { color: var(--text) } ul.ticks li::before { content: "✓"; position: absolute; left: 0; top: 1px; width: 20px; height: 20px; border-radius: 6px; background: var(--ok-soft); color: var(--ok); font-weight: 800; font-size: 12px; display: grid; place-items: center }
-  .mock { background: var(--bg); border: 1px solid var(--border); border-radius: 16px; padding: 24px; box-shadow: 0 20px 50px -20px rgba(15,23,42,.18) }
-  .mock h4 { margin: 0 0 4px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); display: flex } .mock h4 span { margin-left: auto; text-transform: none; letter-spacing: 0; font-weight: 500; color: var(--faint) }
-  .score { display: flex; align-items: baseline; gap: 10px; margin: 6px 0 14px } .score b { font-size: 48px; letter-spacing: -.03em; color: var(--hot) }
-  .chip { font-size: 12.5px; font-weight: 600; padding: 2px 10px; border-radius: 99px; background: var(--hot-soft); color: var(--hot) }
-  .row { display: grid; grid-template-columns: 1fr 110px 44px; gap: 12px; align-items: center; padding: 8px 0; border-bottom: 1px dashed var(--border); font-size: 15px }
-  .row:last-child { border: 0 } .row .b { height: 7px; border-radius: 99px; background: var(--bg-3); position: relative; overflow: hidden }
-  .row .b i { position: absolute; top: 0; bottom: 0; left: 50%; border-radius: 99px; background: var(--ok) } .row .b i.n { left: auto; right: 50%; background: var(--hot) }
-  .row em { font-style: normal; font-weight: 700; text-align: right; color: var(--ok); font-variant-numeric: tabular-nums } .row em.n { color: var(--hot) }
-  .approve { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; align-items: center }
-  .approve .ok { background: var(--ok); color: #fff; border-radius: 10px; padding: 10px 15px; font-weight: 600; font-size: 14.5px }
-  .approve .no { border: 1px solid var(--border); border-radius: 10px; padding: 10px 15px; font-weight: 600; font-size: 14.5px; color: var(--hot) }
-  .approve small { color: var(--faint); font-size: 13px }
-  .shot { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: 0 20px 50px -20px rgba(15,23,42,.2) } .shot img { display: block; width: 100% }
-  .logos { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 36px }
-  .logos span { border: 1px solid var(--border); background: var(--bg); border-radius: 12px; padding: 11px 18px; font-weight: 650; color: var(--muted); font-size: 15px }
-  .eng { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; margin-top: 44px; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: var(--bg) }
-  .eng div { padding: 24px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border) } .eng div:nth-child(3n) { border-right: 0 } .eng div:nth-last-child(-n+3) { border-bottom: 0 }
-  .eng b { display: block; margin-bottom: 6px; font-size: 16px } .eng p { margin: 0; color: var(--muted); font-size: 14.5px }
-  code { font-family: "JetBrains Mono", monospace; font-size: .88em; background: var(--bg-3); padding: 1px 6px; border-radius: 5px }
-  .faq { max-width: 800px; margin: 40px auto 0 } details { border-bottom: 1px solid var(--border); padding: 18px 4px }
-  summary { cursor: pointer; font-weight: 650; font-size: 17px; list-style: none; display: flex } summary::after { content: "+"; margin-left: auto; color: var(--muted); font-size: 22px; line-height: 1 }
-  details[open] summary::after { content: "–" } details p { color: var(--muted); margin: 10px 0 0 }
-  .final { text-align: center; padding: 96px 24px; background: linear-gradient(135deg, #0b1220, #1e3a8a); color: #fff }
-  .final h2 { color: #fff } .final p { color: #c7d2fe; font-size: 18px; max-width: 640px; margin: 0 auto 30px }
-  .final .btn { border-color: transparent } .final .btn.light { background: #fff; color: #0b1220 } .final .btn.ghost { background: transparent; color: #fff; border-color: rgba(255,255,255,.35) }
-  footer { padding: 34px 0; color: var(--muted); font-size: 14px } footer .wrap { display: flex; gap: 20px; align-items: center; flex-wrap: wrap }
-  @media (max-width: 960px) {
-    header nav { display: none } .cards3, .split, .eng { grid-template-columns: 1fr } .split { gap: 36px } .split.rev > :first-child { order: 0 }
-    .flow { grid-template-columns: 1fr 1fr } .eng div { border-right: 0 !important; border-bottom: 1px solid var(--border) !important } .eng div:last-child { border-bottom: 0 !important }
-    section { padding: 64px 0 } .hero { padding-top: 56px } header .btn:not(.primary) { display: none }
+  .btn { display: inline-flex; align-items: center; gap: 9px; padding: 11px 18px; border-radius: 6px; font-weight: 600; font-size: 15px; border: 1.5px solid transparent; transition: .15s; white-space: nowrap }
+  .btn.sig { background: var(--signal); color: #fff } .btn.sig:hover { background: var(--signal-2) }
+  .btn.line { border-color: var(--on-ink-line); color: var(--on-ink) } .btn.line:hover { border-color: var(--on-ink-muted) }
+  .btn.lg { padding: 15px 24px; font-size: 16.5px }
+  .btn .k { font-family: var(--mono); font-size: 13px; opacity: .8 }
+  .hero { position: relative; z-index: 1; display: grid; grid-template-columns: 1.05fr .95fr; gap: 56px; align-items: center; padding: 76px 0 92px }
+  .hero h1 { font-size: clamp(42px, 5.6vw, 76px); line-height: .98; margin: 18px 0 24px; letter-spacing: -.04em }
+  .hero h1 u { text-decoration: none; color: var(--signal); position: relative; white-space: nowrap }
+  .hero h1 u::after { content: ""; position: absolute; left: 0; right: 0; bottom: .02em; height: .1em; background: var(--signal); opacity: .35; border-radius: 2px }
+  .hero p.lead { font-size: 19px; color: var(--on-ink-muted); max-width: 560px; margin: 0 0 34px }
+  .hero p.lead b { color: var(--on-ink); font-weight: 600 }
+  .ctas { display: flex; gap: 12px; flex-wrap: wrap }
+  .stackline { margin-top: 40px; display: flex; gap: 10px 22px; flex-wrap: wrap; font-family: var(--mono); font-size: 13px; color: var(--on-ink-muted) }
+  .stackline span::before { content: "▸ "; color: var(--signal) }
+
+  /* live feed mock */
+  .feed { background: var(--ink-2); border: 1px solid var(--on-ink-line); border-radius: 10px; padding: 16px; box-shadow: 0 40px 90px -30px rgba(0,0,0,.7) }
+  .feed-h { white-space: nowrap; display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 12px; color: var(--on-ink-muted); text-transform: uppercase; letter-spacing: .08em; padding: 2px 4px 12px }
+  .feed-h .live { width: 8px; height: 8px; border-radius: 50%; background: #3ddc84; box-shadow: 0 0 0 0 rgba(61,220,132,.6); animation: pulse 2s infinite }
+  @keyframes pulse { 70% { box-shadow: 0 0 0 8px rgba(61,220,132,0) } 100% { box-shadow: 0 0 0 0 rgba(61,220,132,0) } }
+  .feed-h .rt { margin-left: auto }
+  .ev { display: grid; grid-template-columns: 52px 1fr auto; gap: 14px; align-items: center; background: var(--ink-3); border: 1px solid var(--on-ink-line); border-radius: 7px; padding: 13px 14px; margin-top: 8px; opacity: 0; transform: translateY(8px); animation: in .5s ease forwards }
+  .ev:nth-child(2) { animation-delay: .1s } .ev:nth-child(3) { animation-delay: .3s } .ev:nth-child(4) { animation-delay: .5s } .ev:nth-child(5) { animation-delay: .7s }
+  @keyframes in { to { opacity: 1; transform: none } }
+  .ev .s { font-family: var(--mono); font-weight: 600; font-size: 20px; text-align: center; border-radius: 6px; padding: 6px 0 }
+  .s.hot { background: rgba(242,84,27,.16); color: #ff8a5c } .s.warm { background: rgba(240,162,74,.14); color: #f0b46a } .s.cold { background: rgba(143,186,214,.13); color: #9cc4de } .s.spam { background: rgba(168,161,147,.12); color: #8f887a }
+  .ev b { display: block; color: var(--on-ink); font-weight: 600; font-size: 15px } .ev small { color: var(--on-ink-muted); font-size: 13px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+  .ev .st { font-family: var(--mono); font-size: 11.5px; padding: 3px 8px; border-radius: 4px; border: 1px solid var(--on-ink-line); color: var(--on-ink-muted); white-space: nowrap }
+  .ev .st.ok { color: #6fe0a8; border-color: rgba(111,224,168,.35) } .ev .st.wait { color: #ffb08c; border-color: rgba(255,138,92,.4) }
+  .ev > div, .hero > div { min-width: 0 }
+
+  /* sections */
+  section { padding: 104px 0; border-top: 1px solid var(--line) }
+  .sh { display: grid; grid-template-columns: 440px 1fr; gap: 48px; margin-bottom: 52px }
+  .sh h2 { font-size: clamp(32px, 4vw, 50px); line-height: 1.04; margin: 12px 0 0 }
+  .sh p { margin: 0; color: var(--muted); font-size: 18.5px; max-width: 680px; align-self: end }
+  .num3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-top: 2px solid var(--text) }
+  .num3 > div { padding: 26px 28px 0 0 } .num3 > div + div { padding-left: 28px; border-left: 1px solid var(--line) }
+  .num3 .n { font-family: var(--mono); color: var(--signal); font-size: 14px; font-weight: 500 }
+  .num3 h3 { font-size: 23px; margin: 10px 0 10px; line-height: 1.15 } .num3 p { margin: 0; color: var(--muted) }
+
+  .product { background: var(--paper-2) }
+  .shotwrap { position: relative }
+  .shot { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--card); box-shadow: 0 30px 70px -35px rgba(23,21,15,.45) } .shot img { display: block; width: 100%; height: auto }
+  .notes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 28px }
+  .notes div { border-top: 1px solid var(--text); padding-top: 12px; font-size: 15px; color: var(--muted) } .notes b { display: block; color: var(--text); font-family: var(--display); font-size: 17px; margin-bottom: 4px }
+  .notes .mono { color: var(--signal); font-size: 12.5px }
+
+  .pipe { display: grid; grid-template-columns: repeat(5, 1fr); position: relative }
+  .pipe::before { content: ""; position: absolute; top: 19px; left: 20px; right: 20px; height: 2px; background: repeating-linear-gradient(90deg, var(--text) 0 6px, transparent 6px 12px); opacity: .5 }
+  .pipe > div { position: relative; padding-right: 22px }
+  .pipe .dot { width: 40px; height: 40px; border-radius: 50%; background: var(--paper); border: 2px solid var(--text); display: grid; place-items: center; font-family: var(--mono); font-weight: 600; font-size: 14px; margin-bottom: 20px; position: relative }
+  .pipe > div:last-child .dot { background: var(--signal); border-color: var(--signal); color: #fff }
+  .pipe h3 { font-size: 20px; margin: 0 0 8px } .pipe p { margin: 0; color: var(--muted); font-size: 15px }
+  .pipe .mono { display: block; font-size: 12px; color: var(--faint); margin-top: 10px }
+
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center }
+  .split h2 { font-size: clamp(32px, 4vw, 48px); line-height: 1.04; margin: 12px 0 18px } .split > div > p { color: var(--muted); font-size: 18px; margin: 0 }
+  ul.l { list-style: none; padding: 0; margin: 28px 0 0; display: grid; gap: 0; border-top: 1px solid var(--line) }
+  ul.l li { padding: 15px 0; border-bottom: 1px solid var(--line); color: var(--muted); display: grid; grid-template-columns: 34px 1fr } ul.l li b { color: var(--text) }
+  ul.l li::before { content: "→"; color: var(--signal); font-weight: 700 }
+  .score { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 26px; box-shadow: 0 30px 70px -40px rgba(23,21,15,.5) }
+  .score .hd { display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em } .score .hd span { margin-left: auto; text-transform: none; letter-spacing: 0 }
+  .score .big { display: flex; align-items: baseline; gap: 12px; margin: 10px 0 16px } .score .big b { font-family: var(--mono); font-size: 60px; font-weight: 600; letter-spacing: -.04em; color: var(--hot); line-height: 1 }
+  .chip { font-family: var(--mono); font-size: 12px; font-weight: 500; padding: 3px 9px; border-radius: 4px; background: var(--hot-soft); color: var(--hot) }
+  .r { display: grid; grid-template-columns: 1fr 120px 46px; gap: 14px; align-items: center; padding: 9px 0; border-top: 1px solid var(--line); font-size: 15px }
+  .r .b { height: 6px; background: var(--paper-2); border-radius: 3px; overflow: hidden } .r .b i { display: block; height: 100%; background: var(--ok); border-radius: 3px }
+  .r em { font-style: normal; font-family: var(--mono); font-weight: 600; text-align: right; color: var(--ok) }
+  .acts { display: flex; gap: 10px; margin-top: 20px; align-items: center; flex-wrap: wrap }
+  .acts .a { background: var(--text); color: var(--paper); padding: 10px 15px; border-radius: 6px; font-weight: 600; font-size: 14.5px } .acts .x { border: 1.5px solid var(--line); padding: 9px 14px; border-radius: 6px; font-weight: 600; font-size: 14.5px; color: var(--hot) }
+  .acts small { color: var(--faint); font-family: var(--mono); font-size: 12px }
+
+  .int { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 2px solid var(--text) }
+  .int div { padding: 20px 20px 20px 0; border-bottom: 1px solid var(--line) } .int div:not(:nth-child(4n+1)) { padding-left: 20px; border-left: 1px solid var(--line) }
+  .int b { font-family: var(--display); font-size: 19px; display: block } .int span { color: var(--muted); font-size: 14.5px }
+  .int .mono { color: var(--signal); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; display: block; margin-bottom: 6px }
+
+  .eng { background: var(--ink); color: var(--on-ink); border-top: 0 }
+  .eng .sh p { color: var(--on-ink-muted) } .eng .tag { color: var(--signal-2) }
+  .egrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--on-ink-line); border: 1px solid var(--on-ink-line); border-radius: 10px; overflow: hidden }
+  .egrid div { background: var(--ink); padding: 28px } .egrid b { font-family: var(--display); font-size: 19px; display: block; margin-bottom: 8px } .egrid p { margin: 0; color: var(--on-ink-muted); font-size: 15px }
+  .egrid code { font-family: var(--mono); font-size: 12.5px; color: var(--signal-2); display: block; margin-bottom: 14px }
+
+  .faq { display: grid; grid-template-columns: 360px 1fr; gap: 48px }
+  .faq h2 { font-size: clamp(32px, 4vw, 48px); line-height: 1.04; margin: 12px 0 0 }
+  details { border-top: 1px solid var(--line); padding: 20px 0 } details:last-child { border-bottom: 1px solid var(--line) }
+  summary { cursor: pointer; font-family: var(--display); font-weight: 600; font-size: 20px; list-style: none; display: flex; gap: 16px } summary::-webkit-details-marker { display: none }
+  summary::after { content: "+"; margin-left: auto; font-family: var(--mono); color: var(--signal); font-size: 22px; line-height: 1.1 } details[open] summary::after { content: "−" }
+  details p { color: var(--muted); margin: 12px 0 0; max-width: 720px }
+
+  .final { background: var(--signal); color: #fff; padding: 96px 0 }
+  .final .wrap { display: grid; grid-template-columns: 1.3fr 1fr; gap: 48px; align-items: end }
+  .final h2 { font-size: clamp(38px, 5vw, 64px); line-height: .98; margin: 0; letter-spacing: -.04em } .final p { margin: 0 0 24px; font-size: 18.5px; color: #ffe9de }
+  .final .btn.ink { background: var(--ink); color: var(--on-ink) } .final .btn.ink:hover { background: var(--ink-3) }
+  .final .btn.wh { border-color: rgba(255,255,255,.55); color: #fff } .final .btn.wh:hover { border-color: #fff }
+  footer { background: var(--ink); color: var(--on-ink-muted); padding: 34px 0; font-size: 14.5px } footer .wrap { display: flex; gap: 24px; align-items: center; flex-wrap: wrap } footer a:hover { color: var(--on-ink) }
+  footer .logo { color: var(--on-ink); font-size: 16px } footer .logo img { width: 24px; height: 24px }
+
+  @media (max-width: 980px) {
+    header nav { display: none } header .btn.line { display: none }
+    .hero, .split, .final .wrap, .sh, .faq { grid-template-columns: 1fr } .hero { gap: 44px; padding: 52px 0 64px } .split { gap: 40px }
+    .sh { gap: 16px; margin-bottom: 36px } .num3 { grid-template-columns: 1fr } .num3 > div + div { padding-left: 0; border-left: 0; border-top: 1px solid var(--line); margin-top: 24px }
+    .notes { grid-template-columns: 1fr 1fr } .pipe { grid-template-columns: 1fr; gap: 26px } .pipe::before { top: 20px; bottom: 20px; left: 19px; right: auto; width: 2px; height: auto; background: repeating-linear-gradient(180deg, var(--text) 0 6px, transparent 6px 12px) }
+    .pipe > div { padding: 0 0 0 62px } .pipe .dot { position: absolute; left: 0; top: 0 }
+    .int { grid-template-columns: 1fr 1fr } .int div { padding-left: 0 !important; border-left: 0 !important } .egrid { grid-template-columns: 1fr }
+    section { padding: 72px 0 }
   }
-  @media (max-width: 560px) { .flow { grid-template-columns: 1fr } .row { grid-template-columns: 1fr 70px 38px; font-size: 14px } }
+  @media (max-width: 560px) { .wrap { padding: 0 18px } .notes, .int { grid-template-columns: 1fr } .r { grid-template-columns: 1fr 70px 40px; font-size: 14px } .ev { grid-template-columns: 46px 1fr } .ev .st { display: none } }
+  @media (prefers-reduced-motion: reduce) { .ev { animation: none; opacity: 1; transform: none } .feed-h .live { animation: none } }
 </style>
 </head>
 <body>
+<div class="top">
 <header><div class="wrap">
   <a class="logo" href="/"><img src="/static/logo.svg" alt="">LeadPilot</a>
-  <nav><a href="#how">How it works</a><a href="#control">Control</a><a href="#report">Reporting</a><a href="#integrations">Integrations</a><a href="#faq">FAQ</a></nav>
+  <nav><a href="#product">Product</a><a href="#pipeline">Pipeline</a><a href="#control">Control</a><a href="#integrations">Integrations</a><a href="#faq">FAQ</a></nav>
   <span class="sp"></span>
-  <a class="btn" href="{{CONTACT_URL}}" target="_blank" rel="noopener">Talk to us</a>
-  <a class="btn primary" href="/app">Open live demo</a>
+  <a class="btn line" href="{{CONTACT_URL}}" target="_blank" rel="noopener">Book a call</a>
+  <a class="btn sig" href="/app">Live demo <span class="k">↗</span></a>
 </div></header>
 
-<div class="hero"><div class="wrap">
-  <span class="eyebrow">AI lead qualification for B2B service teams</span>
-  <h1>Every inbound lead qualified in seconds. <span class="grad">Your CRM stays clean.</span></h1>
-  <p class="lead">LeadPilot enriches each lead, has an AI agent read it against your ideal customer profile, scores it with rules you can audit, filters spam and drafts the CRM note and first reply. Nothing reaches HubSpot or Zoho until a human approves it.</p>
-  <div class="ctas"><a class="btn primary lg" href="/app">Try the live demo →</a><a class="btn lg" href="{{CONTACT_URL}}" target="_blank" rel="noopener">Deploy it for your team</a></div>
-  <div class="checks"><span>Runs in your own cloud</span><span>OpenAI, Anthropic or open models</span><span>Every decision audit-logged</span></div>
-  <div class="frame"><div class="bar"><i></i><i></i><i></i><span>leadpilot / inbox</span></div><img src="/static/img/hero.png" alt="LeadPilot inbox: a qualified lead with its pipeline run, qualification and score breakdown" width="1440" height="900"></div>
-</div></div>
-
-<section><div class="wrap center">
-  <div class="kicker">The problem</div>
-  <h2>Inbound is where deals are won or lost</h2>
-  <p class="sub">Forms, Upwork, LinkedIn and referrals all land in the same inbox. Someone has to read each one, look up the company, decide, copy it into the CRM and reply.</p>
-  <div class="cards3" style="text-align:left">
-    <div class="c"><div class="ic">⏱</div><h3>Hot leads wait</h3><p>The best enquiry of the week sits behind newsletters and vendor pitches until someone finds time to triage. By then the buyer is talking to someone else.</p></div>
-    <div class="c"><div class="ic">🧹</div><h3>The CRM fills with noise</h3><p>SEO offers, outsourcing agencies and test submissions get copied in next to real buyers, and every report built on that data is wrong.</p></div>
-    <div class="c"><div class="ic">🎲</div><h3>Nobody can explain the score</h3><p>An LLM that says "82/100" can say 64 tomorrow for the same lead. Sales stops trusting the number and goes back to gut feeling.</p></div>
-  </div>
-</div></section>
-
-<section class="alt" id="how"><div class="wrap center">
-  <div class="kicker">How it works</div>
-  <h2>A bounded pipeline, not a chatbot</h2>
-  <p class="sub">Every lead takes the same five steps. No open-ended agent loops, so cost per lead is predictable and behaviour is testable.</p>
-  <div class="flow" style="text-align:left">
-    <div class="c"><h3>Capture</h3><p>Webhook for any form tool, REST API, or manual entry. Duplicate submissions are dropped with idempotency keys.</p></div>
-    <div class="c"><h3>Enrich</h3><p>Business, free or disposable email. Company website title and description, fetched safely.</p></div>
-    <div class="c"><h3>Qualify</h3><p>An AI agent extracts intent, ICP fit, budget, timeline and use case as structured data, quoting the lead.</p></div>
-    <div class="c"><h3>Score</h3><p>A rule table turns those signals into a 0-100 score with a per-point breakdown. Spam stops here.</p></div>
-    <div class="c"><h3>Approve &amp; sync</h3><p>A writer agent drafts the CRM note and reply. You edit, approve, and the contact lands in your CRM.</p></div>
-  </div>
-</div></section>
-
-<section id="control"><div class="wrap split">
+<div class="wrap hero">
   <div>
-    <div class="kicker">Built for control</div>
-    <h2>The AI reads. The rules decide. You approve.</h2>
-    <p class="sub">LeadPilot uses the model for what it is good at, understanding messy text, and keeps everything that must be consistent out of its hands.</p>
-    <ul class="ticks">
-      <li><b>Deterministic scoring.</b> Same lead, same score, every time. Each point is explained, and the thresholds are yours to tune.</li>
-      <li><b>Human in the loop.</b> Nothing is written to the CRM until someone approves it, and the draft can be edited first.</li>
-      <li><b>Full audit trail.</b> Every agent step, model or rules mode, duration and human decision is logged per lead.</li>
-      <li><b>Graceful degradation.</b> If the model provider fails, the pipeline falls back to rules instead of stopping.</li>
+    <div class="tag">Inbound lead operations · B2B services</div>
+    <h1>Qualify every lead in seconds. <u>Approve</u> what hits your CRM.</h1>
+    <p class="lead">LeadPilot runs each inbound lead through a fixed agent pipeline: <b>enrich, qualify, score, draft</b>. Spam never reaches a human, hot leads surface first, and nothing is written to HubSpot or Zoho until someone on your team says yes.</p>
+    <div class="ctas"><a class="btn sig lg" href="/app">Open the live demo <span class="k">→</span></a><a class="btn line lg" href="{{CONTACT_URL}}" target="_blank" rel="noopener">Deploy it on your stack</a></div>
+    <div class="stackline"><span>LangGraph agents</span><span>Rule-based scoring</span><span>Human approval</span><span>HubSpot · Zoho</span></div>
+  </div>
+  <div class="feed" aria-label="Example of the lead feed">
+    <div class="feed-h"><i class="live"></i>Incoming leads<span class="rt">sample workspace</span></div>
+    <div class="ev"><span class="s hot">91</span><div><b>Northwind Legal · COO</b><small>RAG assistant over 40k contracts · $15k · this quarter</small></div><span class="st wait">needs review</span></div>
+    <div class="ev"><span class="s hot">80</span><div><b>CareFirst Clinics · Head of Ops</b><small>Voice agent for 6 clinics · 300 calls/day · ASAP</small></div><span class="st wait">needs review</span></div>
+    <div class="ev"><span class="s warm">50</span><div><b>Zenith Logistics · Ops Manager</b><small>Email agent → Zoho CRM · exploring</small></div><span class="st ok">synced · Zoho</span></div>
+    <div class="ev"><span class="s spam">0</span><div><b>rankboostseo.net</b><small>"Rank your website on Google page 1…"</small></div><span class="st">spam · filtered</span></div>
+  </div>
+</div>
+</div>
+
+<section id="problem"><div class="wrap">
+  <div class="sh"><div><div class="tag">01 · The problem</div><h2>Where inbound deals slip</h2></div><p>Forms, Upwork, LinkedIn and referrals land in one inbox. Someone has to read each message, look up the company, decide, copy it into the CRM and write back. That is where deals slip.</p></div>
+  <div class="num3">
+    <div><span class="n">/01</span><h3>The best lead waits behind the noise</h3><p>Vendor pitches and newsletters bury the one enquiry with a budget. By the time someone triages, the buyer has booked a call elsewhere.</p></div>
+    <div><span class="n">/02</span><h3>The CRM fills with junk</h3><p>SEO offers and test submissions get copied in next to real buyers, and every pipeline number built on that data is wrong.</p></div>
+    <div><span class="n">/03</span><h3>Nobody trusts the score</h3><p>A model that says 82 today and 64 tomorrow for the same lead gets ignored. Sales goes back to gut feeling.</p></div>
+  </div>
+</div></section>
+
+<section class="product" id="product"><div class="wrap">
+  <div class="sh"><div><div class="tag">02 · The product</div><h2>One inbox for every inbound lead</h2></div><p>Each lead shows exactly what the agents found, how the score was built, and the reply drafted for it. Your team reviews, edits and approves in one place.</p></div>
+  <div class="shotwrap"><div class="shot"><img src="/static/img/hero.png" alt="LeadPilot inbox: a qualified lead with its pipeline run, qualification and score breakdown" width="1440" height="900"></div></div>
+  <div class="notes">
+    <div><span class="mono">queue</span><b>Hot leads first</b>Sorted by score, with spam already set aside.</div>
+    <div><span class="mono">trace</span><b>Pipeline run</b>Every step with its duration and the mode it ran in.</div>
+    <div><span class="mono">score</span><b>Point-by-point</b>Each rule that fired and what it was worth.</div>
+    <div><span class="mono">draft</span><b>Reply ready</b>CRM note and first email, editable before approval.</div>
+  </div>
+</div></section>
+
+<section id="pipeline"><div class="wrap">
+  <div class="sh"><div><div class="tag">03 · The pipeline</div><h2>A fixed path, not an open loop</h2></div><p>Every lead takes the same route through a bounded LangGraph graph. Two model calls per lead at most, so cost is known up front and behaviour is testable.</p></div>
+  <div class="pipe">
+    <div><span class="dot">1</span><h3>Capture</h3><p>Webhook for any form tool, REST API or manual entry. Duplicates dropped by idempotency key.</p><span class="mono">POST /api/webhooks/lead</span></div>
+    <div><span class="dot">2</span><h3>Enrich</h3><p>Business, free or disposable email. Company website title and description, fetched safely.</p><span class="mono">public hosts only</span></div>
+    <div><span class="dot">3</span><h3>Qualify</h3><p>An agent extracts intent, ICP fit, budget, timeline and use case as typed data, quoting the lead.</p><span class="mono">structured output</span></div>
+    <div><span class="dot">4</span><h3>Score</h3><p>A rule table turns signals into 0–100 with a breakdown. Spam stops here.</p><span class="mono">hot ≥ 70 · warm ≥ 45</span></div>
+    <div><span class="dot">5</span><h3>Approve</h3><p>A writer agent drafts the CRM note and reply. You approve, the contact lands in your CRM.</p><span class="mono">human in the loop</span></div>
+  </div>
+</div></section>
+
+<section class="product" id="control"><div class="wrap split">
+  <div>
+    <div class="tag">04 · Control</div>
+    <h2>The model reads. The rules score. You decide.</h2>
+    <p>Language models are good at understanding messy messages. They are bad at being consistent. LeadPilot keeps them on the first job only.</p>
+    <ul class="l">
+      <li><span><b>Same lead, same score.</b> Points come from rules you can read and tune, not from a prompt.</span></li>
+      <li><span><b>Approval before sync.</b> Nothing reaches the CRM until a person approves, and the draft can be edited first.</span></li>
+      <li><span><b>Full audit trail.</b> Each agent step, its duration and every human decision is logged per lead.</span></li>
+      <li><span><b>Keeps running.</b> If the model provider fails, the pipeline falls back to rules and flags the lead.</span></li>
     </ul>
   </div>
-  <div class="mock">
-    <h4>Lead score <span>deterministic · auditable</span></h4>
-    <div class="score"><b>91</b><span class="chip">hot</span></div>
-    <div class="row"><span>Business email domain</span><div class="b"><i style="width:30%"></i></div><em>+15</em></div>
-    <div class="row"><span>Decision-maker title: CTO</span><div class="b"><i style="width:30%"></i></div><em>+15</em></div>
-    <div class="row"><span>High buying intent</span><div class="b"><i style="width:50%"></i></div><em>+25</em></div>
-    <div class="row"><span>Strong ICP fit</span><div class="b"><i style="width:30%"></i></div><em>+15</em></div>
-    <div class="row"><span>Budget stated ($25k)</span><div class="b"><i style="width:30%"></i></div><em>+15</em></div>
-    <div class="row"><span>Timeline: this quarter</span><div class="b"><i style="width:12%"></i></div><em>+6</em></div>
-    <div class="approve"><span class="ok">✓ Approve &amp; sync to HubSpot</span><span class="no">Reject</span><small>Nothing is written until you approve.</small></div>
+  <div class="score">
+    <div class="hd">Lead score<span>deterministic · auditable</span></div>
+    <div class="big"><b>91</b><span class="chip">hot</span></div>
+    <div class="r"><span>Business email domain</span><div class="b"><i style="width:60%"></i></div><em>+15</em></div>
+    <div class="r"><span>Decision-maker title: CTO</span><div class="b"><i style="width:60%"></i></div><em>+15</em></div>
+    <div class="r"><span>High buying intent</span><div class="b"><i style="width:100%"></i></div><em>+25</em></div>
+    <div class="r"><span>Strong ICP fit</span><div class="b"><i style="width:60%"></i></div><em>+15</em></div>
+    <div class="r"><span>Budget stated ($25k)</span><div class="b"><i style="width:60%"></i></div><em>+15</em></div>
+    <div class="r"><span>Timeline: this quarter</span><div class="b"><i style="width:24%"></i></div><em>+6</em></div>
+    <div class="acts"><span class="a">Approve &amp; sync to HubSpot</span><span class="x">Reject</span><small>nothing is written until you approve</small></div>
   </div>
 </div></section>
 
-<section class="alt" id="report"><div class="wrap split rev">
-  <div>
-    <div class="kicker">Reporting</div>
-    <h2>The weekly pipeline report writes itself</h2>
-    <p class="sub">Every Monday, an analyst agent turns the week into a short brief: volume, quality, sources, what buyers ask for, which hot leads still wait, and three actions for the week ahead.</p>
-    <ul class="ticks">
-      <li><b>Numbers from SQL, never from the model.</b> The agent only writes the narrative around metrics it is given, so it cannot invent a figure.</li>
-      <li><b>Delivered where you work.</b> In the console and in Slack.</li>
-    </ul>
-  </div>
+<section id="report"><div class="wrap split">
   <div class="shot"><img src="/static/img/report.png" alt="Weekly pipeline report" width="1440" height="900"></div>
-</div></section>
-
-<section id="integrations"><div class="wrap center">
-  <div class="kicker">Integrations</div>
-  <h2>Plugs into the stack you already have</h2>
-  <p class="sub">Approved leads are upserted into your CRM with stage, status and a qualification note. Leads come from any form that can send a webhook.</p>
-  <div class="logos"><span>HubSpot</span><span>Zoho CRM</span><span>Typeform</span><span>Tally</span><span>Webflow</span><span>WordPress</span><span>Zapier</span><span>Make</span><span>n8n</span><span>Slack</span><span>OpenAI</span><span>Anthropic</span><span>Groq</span><span>REST API</span></div>
-</div></section>
-
-<section class="alt"><div class="wrap center">
-  <div class="kicker">Under the hood</div>
-  <h2>Engineered like infrastructure</h2>
-  <p class="sub">Python, FastAPI, LangGraph and PostgreSQL. Runs as a container or serverless, in your cloud, on your database.</p>
-  <div class="eng" style="text-align:left">
-    <div><b>Bounded LangGraph DAG</b><p>Four agent steps at most, with conditional routing. Two model calls per lead, so cost is known before you launch.</p></div>
-    <div><b>Structured outputs</b><p>Every agent returns a typed schema. The pipeline never parses free text from a model.</p></div>
-    <div><b>Postgres job queue</b><p>Atomic claims, retries with a cap, failed state with the error kept for inspection.</p></div>
-    <div><b>Pluggable CRM adapters</b><p>HubSpot and Zoho included, with retries on rate limits. A new CRM is one adapter file.</p></div>
-    <div><b>Safe enrichment</b><p>Website lookups only reach public addresses, with redirects checked hop by hop.</p></div>
-    <div><b>Tested in CI</b><p>Pipeline routing, scoring, CRM request shapes and the full approval flow, on SQLite and PostgreSQL.</p></div>
+  <div>
+    <div class="tag">05 · Reporting</div>
+    <h2>Monday's pipeline brief, already written</h2>
+    <p>An analyst agent turns the week into a short brief: volume, lead quality, sources, what buyers ask for, which hot leads still wait, and three actions for the week ahead.</p>
+    <ul class="l">
+      <li><span><b>Numbers from SQL.</b> The agent only writes the narrative around metrics it is handed, so it cannot invent a figure.</span></li>
+      <li><span><b>Where you work.</b> In the app and posted to Slack.</span></li>
+    </ul>
   </div>
 </div></section>
 
-<section id="faq"><div class="wrap">
-  <div class="center"><div class="kicker">FAQ</div><h2>Questions teams ask first</h2></div>
-  <div class="faq">
+<section class="product" id="integrations"><div class="wrap">
+  <div class="sh"><div><div class="tag">06 · Integrations</div><h2>Fits the stack you run</h2></div><p>Approved leads are upserted into your CRM with stage, status and a qualification note. Leads arrive from any tool that can send a webhook.</p></div>
+  <div class="int">
+    <div><span class="mono">crm</span><b>HubSpot</b><span>Contacts, lifecycle stage, note</span></div>
+    <div><span class="mono">crm</span><b>Zoho CRM</b><span>Leads upsert, status, note</span></div>
+    <div><span class="mono">intake</span><b>Forms</b><span>Typeform, Tally, Webflow, WordPress</span></div>
+    <div><span class="mono">intake</span><b>Automation</b><span>Zapier, Make, n8n, REST API</span></div>
+    <div><span class="mono">alerts</span><b>Slack</b><span>Hot lead pings, weekly report</span></div>
+    <div><span class="mono">models</span><b>OpenAI · Anthropic</b><span>Or any OpenAI-compatible endpoint</span></div>
+    <div><span class="mono">data</span><b>PostgreSQL</b><span>Your database, your cloud</span></div>
+    <div><span class="mono">deploy</span><b>Docker · Serverless</b><span>Container or Vercel functions</span></div>
+  </div>
+</div></section>
+
+<section class="eng"><div class="wrap">
+  <div class="sh"><div><div class="tag">07 · Engineering</div><h2>Built to run, not to demo</h2></div><p>Python, FastAPI, LangGraph and PostgreSQL. The live demo is the production code on a sample workspace.</p></div>
+  <div class="egrid">
+    <div><code>graph.py</code><b>Bounded agent graph</b><p>Four steps at most with conditional routing. No agent can loop and burn tokens.</p></div>
+    <div><code>agents.py</code><b>Typed outputs</b><p>Every agent returns a validated schema. The pipeline never parses free text from a model.</p></div>
+    <div><code>services.py</code><b>Postgres job queue</b><p>Atomic claims, capped retries, failed state with the error kept for inspection.</p></div>
+    <div><code>crm/</code><b>CRM adapters</b><p>HubSpot and Zoho with rate-limit retries. Adding a CRM is one adapter file.</p></div>
+    <div><code>enrichment.py</code><b>Safe enrichment</b><p>Website lookups only reach public addresses, with every redirect checked.</p></div>
+    <div><code>tests/</code><b>Tested in CI</b><p>Routing, scoring, CRM request shapes and the approval flow, on SQLite and PostgreSQL.</p></div>
+  </div>
+</div></section>
+
+<section id="faq"><div class="wrap faq">
+  <div><div class="tag">08 · FAQ</div><h2>What teams ask first</h2></div>
+  <div>
     <details open><summary>Does the AI write directly into our CRM?</summary><p>No. The agents qualify, score and draft. A person approves each lead, optionally after editing the note or reply, and only then is the contact created or updated in HubSpot or Zoho.</p></details>
-    <details><summary>Can it follow our own definition of a good lead?</summary><p>Yes. Your ideal customer profile is written in plain language for the qualifier agent, and the scoring rules and hot/warm thresholds are configuration, not prompts.</p></details>
-    <details><summary>Which models does it use, and what does it cost to run?</summary><p>OpenAI, Anthropic, or any OpenAI-compatible endpoint such as Groq, Gemini or a self-hosted model. Each lead costs two model calls; with a small model that is a fraction of a cent per lead.</p></details>
+    <details><summary>Can it use our own definition of a good lead?</summary><p>Yes. Your ideal customer profile is written in plain language for the qualifier agent, and the scoring rules and hot/warm thresholds are configuration, not prompts.</p></details>
+    <details><summary>Which models does it use, and what does a lead cost?</summary><p>OpenAI, Anthropic, or any OpenAI-compatible endpoint such as Groq, Gemini or a self-hosted model. Each lead costs two model calls; with a small model that is a fraction of a cent.</p></details>
     <details><summary>Where does our data live?</summary><p>In your own PostgreSQL database and your own cloud account. LeadPilot ships as a Docker image and also runs serverless.</p></details>
-    <details><summary>What if the model provider is down?</summary><p>The qualifier and writer fall back to deterministic rules and templates, the lead is flagged with a warning, and nothing is lost.</p></details>
+    <details><summary>What happens if the model provider is down?</summary><p>The qualifier and writer fall back to deterministic rules and templates, the lead is flagged with a warning, and nothing is lost.</p></details>
     <details><summary>Is the live demo real?</summary><p>The pipeline is the production code. The workspace, Northwind Studio, is sample data, syncs to a sandbox CRM and resets every day. Send it a lead of your own and watch it go through.</p></details>
   </div>
 </div></section>
 
-<div class="final">
-  <h2>Put LeadPilot on your pipeline</h2>
-  <p>Your forms, your CRM, your definition of a good lead. Set up in your stack, with your team approving every lead from day one.</p>
-  <div class="ctas"><a class="btn lg light" href="{{CONTACT_URL}}" target="_blank" rel="noopener">Talk to us</a><a class="btn lg ghost" href="/app">Try the live demo</a></div>
-</div>
+<div class="final"><div class="wrap">
+  <h2>Put your inbound on autopilot. Keep the final say.</h2>
+  <div><p>Your forms, your CRM, your definition of a good lead, set up on your stack with your team approving from day one.</p>
+  <div class="ctas"><a class="btn ink lg" href="{{CONTACT_URL}}" target="_blank" rel="noopener">Book a call</a><a class="btn wh lg" href="/app">Open the live demo</a></div></div>
+</div></div>
 
-<footer><div class="wrap"><a class="logo" href="/" style="font-size:15px"><img src="/static/logo.svg" alt="" style="width:24px;height:24px">LeadPilot</a><span>AI lead qualification with human approval.</span><span class="sp"></span><a href="/app">Live demo</a><a href="/docs">API</a><a href="{{CONTACT_URL}}" target="_blank" rel="noopener">Contact</a></div></footer>
+<footer><div class="wrap"><a class="logo" href="/"><img src="/static/logo.svg" alt="">LeadPilot</a><span>Inbound lead qualification with human approval.</span><span class="sp"></span><a href="/app">Live demo</a><a href="/docs">API</a><a href="{{CONTACT_URL}}" target="_blank" rel="noopener">Contact</a></div></footer>
 </body>
 </html>

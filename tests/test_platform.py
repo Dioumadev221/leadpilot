@@ -14,7 +14,7 @@ def st(client):
 
 
 def test_pages_and_meta(client):
-    assert "Every inbound lead" in client.get("/").text
+    assert "Qualify every lead" in client.get("/").text
     assert "LeadPilot" in client.get("/app").text
     assert client.get("/favicon.ico").headers["content-type"].startswith("image/svg")
     meta = client.get("/api/meta").json()
